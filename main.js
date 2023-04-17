@@ -29,61 +29,62 @@ function createTable(csvData) {
   return table;
 }
 
-function generateSkillsHTML(skills) {
+function generateSkillsHTML(attributes) {
   let html = "";
 
-  if (skills.abilities && skills.abilities.length > 0) {
-    // Add abilities section heading
-    html += `<fieldset>
-                <legend>Abilities</legend>`;
+  if (attributes.abilities && attributes.abilities.length > 0) {
+    // Add abilities section heading and checkbox
+    html += `<h2>Abilities</h2>`;
 
-    // Add abilities
-    for (let ability of skills.abilities) {
-      html += `<div class="form-group">
-                  <label for="${ability.name}">${ability.name}:</label>
-                  <input class="form-control" type="number" id="${ability.name}" name="${ability.name}" value="${ability.value}">
-                  <p class="help-text">${ability.description}</p>
+    // Add abilities with checkbox to each ability
+    for (let ability of attributes.abilities) {
+      html += `<div class="ability">
+                  <label>
+                    <input type="checkbox" name="${ability.name}" value="${ability.value}">
+                    ${ability.name}:
+                  </label>
+                  <input type="number" name="${ability.name}_value" value="${ability.value}">
+                  <span class="description">${ability.description}</span>
                </div>`;
     }
-
-    html += `</fieldset>`;
   }
 
-  if (skills.skills && skills.skills.length > 0) {
-    // Add skills section heading
-    html += `<fieldset>
-                <legend>Skills</legend>`;
+  if (attributes.skills && attributes.skills.length > 0) {
+    // Add skills section heading and checkbox
+    html += `<h2>Skills</h2>`;
 
     // Group skills by category
     const groupedSkills = {};
-    for (let skill of skills.skills) {
+    for (let skill of attributes.skills) {
       if (!groupedSkills[skill.category]) {
         groupedSkills[skill.category] = [];
       }
       groupedSkills[skill.category].push(skill);
     }
+    // console.log(groupedSkills)
 
-    // Add skills under each category
+    // Add skills with checkbox to each skill
     for (let category in groupedSkills) {
-      html += `<fieldset>
-                  <legend>${category}</legend>`;
-
+      html += `<h3>${category}</h3>`;
       for (let skill of groupedSkills[category]) {
-        html += `<div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="${skill.name}" name="${skill.name}" value="${skill.value}">
-                    <label class="form-check-label" for="${skill.name}">${skill.name}</label>
-                    <p class="help-text">${skill.description}</p>
+        html += `<div class="skill">
+                    <label>
+                      <input type="checkbox" name="${skill.name}" value="${skill.value}">
+                      ${skill.name}
+                    </label>
+                    <input type="number" name="${skill.name}_value" value="${skill.value}">
+                    <span class="description">${skill.description}</span>
                  </div>`;
       }
-
-      html += `</fieldset>`;
     }
-
-    html += `</fieldset>`;
   }
+
+  // Add submit button
+  html += '<input type="submit" value="Submit">';
 
   return html;
 }
+
 
 
 function loadCharacterSheet() {
@@ -123,7 +124,7 @@ function parseCSV(csv) {
       }
     }
 
-    cells.push(currentCell);
+    cells.push(currentCell.trimEnd());
 
     return cells;
   });
@@ -150,16 +151,16 @@ function parseCSV(csv) {
   }
 
   // Parse skills section
-  let row = skillStartIndex + 3;
   for (let column = 0; column < skillCategories.length; column++) {
+    let row = skillStartIndex + 3;
     const category = skillCategories[column];
-    if (category) {
-      while (lines[row][0] !== "") {
+    if (category !== "") {
+      while (lines[row][column] !== "") {
         const skill = {
           name: lines[row][column],
           category: category,
-          description: lines[row + 1][1],
-          value: lines[row + 1][0],
+          description: lines[row + 1][column+1],
+          value: lines[row + 1][column],
         };
         skills.push(skill);
         row++;
