@@ -1,34 +1,3 @@
-function createTable(csvData) {
-  const table = document.createElement("table");
-
-  // create table headers
-  const headers = ["Name", "Description", "Value"];
-  const headerRow = document.createElement("tr");
-  headers.forEach((header) => {
-    const th = document.createElement("th");
-    th.textContent = header;
-    headerRow.appendChild(th);
-  });
-  table.appendChild(headerRow);
-
-  // create table rows
-  csvData.forEach((row) => {
-    const tr = document.createElement("tr");
-    const nameTd = document.createElement("td");
-    const descriptionTd = document.createElement("td");
-    const valueTd = document.createElement("td");
-    nameTd.textContent = row.name;
-    descriptionTd.textContent = row.description;
-    valueTd.textContent = row.value;
-    tr.appendChild(nameTd);
-    tr.appendChild(descriptionTd);
-    tr.appendChild(valueTd);
-    table.appendChild(tr);
-  });
-
-  return table;
-}
-
 function generateSkillsHTML(attributes) {
   let html = "";
 
@@ -183,6 +152,47 @@ function readCSV(file, callback) {
   };
   xhr.send();
 }
+
+function calculateRoll(n) {
+  let sum = 0;
+  for (let i = 0; i < n; i++) {
+    let roll = window.crypto.getRandomValues(new Uint8Array(1))[0] % 6 + 1;
+    sum += roll;
+  }
+  return sum;
+}
+
+function onSubmit(event) {
+  event.preventDefault();
+
+  // Get selected abilities and skills
+  const selected = [];
+  const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+  for (let checkbox of checkboxes) {
+    selected.push(checkbox.value);
+  }
+
+  // Generate random numbers and sum
+  let totalSelected = 0;
+  for (let item of selected) {
+    const randomNumber = window.crypto.getRandomValues(new Uint32Array(1))[0] % 6 + 1;
+    totalSelected += parseInt(item) + randomNumber;
+  }
+
+  // Get user input for total roll
+  const totalRollInput = document.querySelector('input[name="total-roll"]');
+  const totalRoll = parseInt(totalRollInput.value);
+
+  // Compare selected total to user input total
+  const resultElement = document.getElementById('result');
+  if (totalSelected >= totalRoll) {
+    resultElement.textContent = "Success!";
+  } else {
+    resultElement.textContent = "Failure :(";
+  }
+}
+
+
 
 fetch("skills.csv")
   .then((response) => response.text())
