@@ -63,6 +63,12 @@ function loadCharacterSheet() {
 
     // Add skills to DOM
     document.querySelector("#skills").innerHTML = skillsHTML;
+
+    // add event listener
+    document.getElementById('skills').addEventListener("submit", (event) => {
+      event.preventDefault();
+      onSubmit(event);
+    })
   });
 }
 
@@ -162,6 +168,24 @@ function calculateRoll(n) {
   return sum;
 }
 
+function submitHandler(event) {
+  event.preventDefault();
+
+  let totalRoll = 0;
+  const selectedAbilities = document.querySelectorAll('input[name="ability"]:checked');
+  const selectedSkills = document.querySelectorAll('input[name="skill"]:checked');
+
+  for (let ability of selectedAbilities) {
+    totalRoll += calculateRoll(1);
+  }
+
+  for (let skill of selectedSkills) {
+    totalRoll += calculateRoll(1);
+  }
+
+  console.log(`Total roll: ${totalRoll}`);
+}
+
 function onSubmit(event) {
   event.preventDefault();
 
@@ -169,26 +193,26 @@ function onSubmit(event) {
   const selected = [];
   const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
   for (let checkbox of checkboxes) {
-    selected.push(checkbox.value);
+    selected.push(parseInt(checkbox.value));
   }
 
   // Generate random numbers and sum
-  let totalSelected = 0;
-  for (let item of selected) {
-    const randomNumber = window.crypto.getRandomValues(new Uint32Array(1))[0] % 6 + 1;
-    totalSelected += parseInt(item) + randomNumber;
-  }
+  const totalRoll = calculateRoll(selected.length);
 
   // Get user input for total roll
-  const totalRollInput = document.querySelector('input[name="total-roll"]');
-  const totalRoll = parseInt(totalRollInput.value);
+  const totalSelected = selected.reduce((prev, curr) => prev + curr, 0);
+
 
   // Compare selected total to user input total
   const resultElement = document.getElementById('result');
   if (totalSelected >= totalRoll) {
-    resultElement.textContent = "Success!";
+    resultElement.textContent = `Success! 
+    Rolled: ${totalRoll} 
+    against your stats: ${totalSelected}`;
   } else {
-    resultElement.textContent = "Failure :(";
+    resultElement.textContent = `Failure :( 
+      Rolled: ${totalRoll} 
+      against your stats: ${totalSelected}`;
   }
 }
 
