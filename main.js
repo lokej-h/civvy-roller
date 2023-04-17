@@ -34,23 +34,25 @@ function generateSkillsHTML(skills) {
 
   if (skills.abilities && skills.abilities.length > 0) {
     // Add abilities section heading
-    html += `<h2>Abilities</h2>`;
+    html += `<fieldset>
+                <legend>Abilities</legend>`;
 
     // Add abilities
     for (let ability of skills.abilities) {
-      html += `<div class="ability">
-                  <label>
-                    ${ability.name}:
-                    <input type="number" name="${ability.name}" value="${ability.value}">
-                  </label>
-                  <span class="description">${ability.description}</span>
+      html += `<div class="form-group">
+                  <label for="${ability.name}">${ability.name}:</label>
+                  <input class="form-control" type="number" id="${ability.name}" name="${ability.name}" value="${ability.value}">
+                  <p class="help-text">${ability.description}</p>
                </div>`;
     }
+
+    html += `</fieldset>`;
   }
 
   if (skills.skills && skills.skills.length > 0) {
     // Add skills section heading
-    html += `<h2>Skills</h2>`;
+    html += `<fieldset>
+                <legend>Skills</legend>`;
 
     // Group skills by category
     const groupedSkills = {};
@@ -63,21 +65,26 @@ function generateSkillsHTML(skills) {
 
     // Add skills under each category
     for (let category in groupedSkills) {
-      html += `<h3>${category}</h3>`;
+      html += `<fieldset>
+                  <legend>${category}</legend>`;
+
       for (let skill of groupedSkills[category]) {
-        html += `<div class="skill">
-                    <label>
-                      <input type="checkbox" name="${skill.name}" value="${skill.value}">
-                      ${skill.name}
-                    </label>
-                    <span class="description">${skill.description}</span>
+        html += `<div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="${skill.name}" name="${skill.name}" value="${skill.value}">
+                    <label class="form-check-label" for="${skill.name}">${skill.name}</label>
+                    <p class="help-text">${skill.description}</p>
                  </div>`;
       }
+
+      html += `</fieldset>`;
     }
+
+    html += `</fieldset>`;
   }
 
   return html;
 }
+
 
 function loadCharacterSheet() {
   readCSV("skills.csv", function (csv) {
