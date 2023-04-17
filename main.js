@@ -38,10 +38,10 @@ function generateSkillsHTML(attributes) {
       for (let skill of groupedSkills[category]) {
         html += `<div class="skill">
                     <label>
-                      <input type="checkbox" name="${skill.name}" value="${skill.value}">
+                      <input type="checkbox" name="${skill.name}" id="${skill.name}" value="${skill.value}">
                       ${skill.name}
                     </label>
-                    <input type="number" name="${skill.name}_value" value="${skill.value}">
+                    <input type="number" name="${skill.name}_value" id="${skill.name}_value" value="${skill.value}">
                     <span class="description">${skill.description}</span>
                  </div>`;
       }
@@ -193,7 +193,7 @@ function onSubmit(event) {
   const selected = [];
   const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
   for (let checkbox of checkboxes) {
-    selected.push(parseInt(checkbox.value));
+    selected.push(document.getElementById(checkbox.id+"_value").valueAsNumber);
   }
 
   // Generate random numbers and sum
@@ -205,12 +205,16 @@ function onSubmit(event) {
 
   // Compare selected total to user input total
   const resultElement = document.getElementById('result');
-  if (totalSelected >= totalRoll) {
-    resultElement.textContent = `Success! 
+  if (totalSelected > totalRoll) {
+    resultElement.textContent = `${totalSelected - totalRoll} Successes! 
+    Rolled: ${totalRoll} 
+    against your stats: ${totalSelected}`;
+  } else if (totalSelected === totalRoll) {
+    resultElement.textContent = `Match! 
     Rolled: ${totalRoll} 
     against your stats: ${totalSelected}`;
   } else {
-    resultElement.textContent = `Failure :( 
+    resultElement.textContent = `${totalRoll - totalSelected} Failures... 
       Rolled: ${totalRoll} 
       against your stats: ${totalSelected}`;
   }
