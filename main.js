@@ -54,21 +54,20 @@ function generateSkillsHTML(attributes) {
   return html;
 }
 
-
+function handleFile() {
+  const input = document.getElementById("file-input");
+  const file = input.files[0];
+  const reader = new FileReader();
+  reader.readAsText(file);
+  reader.onload = function() {
+    const csv = reader.result;
+    loadCSV(csv);
+  }
+}
 
 function loadCharacterSheet() {
   readCSV("skills.csv", function (csv) {
-    const skills = parseCSV(csv);
-    const skillsHTML = generateSkillsHTML(skills);
-
-    // Add skills to DOM
-    document.querySelector("#skills").innerHTML = skillsHTML;
-
-    // add event listener
-    document.getElementById('skills').addEventListener("submit", (event) => {
-      event.preventDefault();
-      onSubmit(event);
-    })
+    loadCSV(csv);
   });
 }
 
@@ -198,6 +197,10 @@ function onSubmit(event) {
 
   // Generate random numbers and sum
   const totalRoll = calculateRoll(selected.length);
+  let snakeEyesComment = "";
+  if (totalRoll === selected.length) {
+    snakeEyesComment = `SNAKE EYES! ALL ROLLS WERE 1!!!     `
+  };
 
   // Get user input for total roll
   const totalSelected = selected.reduce((prev, curr) => prev + curr, 0);
@@ -206,15 +209,15 @@ function onSubmit(event) {
   // Compare selected total to user input total
   const resultElement = document.getElementById('result');
   if (totalSelected > totalRoll) {
-    resultElement.textContent = `${totalSelected - totalRoll} Successes! 
+    resultElement.textContent = snakeEyesComment + `${totalSelected - totalRoll} Successes! 
     Rolled: ${totalRoll} 
     against your stats: ${totalSelected}`;
   } else if (totalSelected === totalRoll) {
-    resultElement.textContent = `Match! 
+    resultElement.textContent = snakeEyesComment + `Match! 
     Rolled: ${totalRoll} 
     against your stats: ${totalSelected}`;
   } else {
-    resultElement.textContent = `${totalRoll - totalSelected} Failures... 
+    resultElement.textContent = snakeEyesComment + `${totalRoll - totalSelected} Failures... 
       Rolled: ${totalRoll} 
       against your stats: ${totalSelected}`;
   }
@@ -222,9 +225,23 @@ function onSubmit(event) {
 
 
 
-fetch("skills.csv")
-  .then((response) => response.text())
-  .then((text) => {
-    const skills = parseCSV(text);
-    console.log(skills);
-  });
+
+  function loadCSV(csv) {
+    const skills = parseCSV(csv);
+    const skillsHTML = generateSkillsHTML(skills);
+
+    // Add skills to DOM
+    document.querySelector("#skills").innerHTML = skillsHTML;
+
+    // add event listener
+    document.getElementById('skills').addEventListener("submit", (event) => {
+      event.preventDefault();
+      onSubmit(event);
+    });
+  }
+// fetch("skills.csv")
+//   .then((response) => response.text())
+//   .then((text) => {
+//     const skills = parseCSV(text);
+//     console.log(skills);
+//   });
