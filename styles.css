@@ -34,3 +34,31 @@ input[type="checkbox"] {
 .description {
   font-style: italic;
 }
+
+button:disabled {
+    opacity: 0.33;
+    pointer-events: none;
+}
+
+#spinner {
+    border: 16px solid #f3f3f3;
+    border-top: 16px solid #3498db;
+    border-radius: 50%;
+    width: 120px;
+    height: 120px;
+    animation: spin 0.5s linear infinite;
+    margin: 50px auto;
+    display: none;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  #spinner-container {
+    position: fixed;
+    top: 50vh;
+    left: 50vw;
+    transform: translate(-50%, -50%);
+  }

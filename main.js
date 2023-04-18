@@ -205,22 +205,31 @@ function onSubmit(event) {
   // Get user input for total roll
   const totalSelected = selected.reduce((prev, curr) => prev + curr, 0);
 
+  // do a little spinny for the UI
+  document.getElementById("spinner").style.display = "block";
+  document.getElementById("result").style.display = "none";
+  document.querySelector('input[type=submit]').disabled = true;
 
-  // Compare selected total to user input total
-  const resultElement = document.getElementById('result');
-  if (totalSelected > totalRoll) {
-    resultElement.textContent = snakeEyesComment + `${totalSelected - totalRoll} Successes! 
-    Rolled: ${totalRoll} 
-    against your stats: ${totalSelected}`;
-  } else if (totalSelected === totalRoll) {
-    resultElement.textContent = snakeEyesComment + `Match! 
-    Rolled: ${totalRoll} 
-    against your stats: ${totalSelected}`;
-  } else {
-    resultElement.textContent = snakeEyesComment + `${totalRoll - totalSelected} Failures... 
+  setTimeout(() => {
+    // Compare selected total to user input total
+    const resultElement = document.getElementById('result');
+    if (totalSelected > totalRoll) {
+      resultElement.textContent = snakeEyesComment + `${totalSelected - totalRoll} Successes! 
       Rolled: ${totalRoll} 
       against your stats: ${totalSelected}`;
-  }
+    } else if (totalSelected === totalRoll) {
+      resultElement.textContent = snakeEyesComment + `Match! 
+      Rolled: ${totalRoll} 
+      against your stats: ${totalSelected}`;
+    } else {
+      resultElement.textContent = snakeEyesComment + `${totalRoll - totalSelected} Failures... 
+        Rolled: ${totalRoll} 
+        against your stats: ${totalSelected}`;
+    }
+    document.getElementById("spinner").style.display = "none";
+    document.getElementById("result").style.display = "block";
+    document.querySelector('input[type=submit]').disabled = false;
+  }, 500);
 }
 
 
