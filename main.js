@@ -206,7 +206,7 @@ function onSubmit(event) {
   const totalSelected = selected.reduce((prev, curr) => prev + curr, 0);
 
   // do a little spinny for the UI
-  document.getElementById("spinner").style.display = "block";
+  document.getElementById("spinner-container").style.display = "block";
   document.getElementById("result").style.display = "none";
   document.querySelector('input[type=submit]').disabled = true;
 
@@ -226,7 +226,7 @@ function onSubmit(event) {
         Rolled: ${totalRoll} 
         against your stats: ${totalSelected}`;
     }
-    document.getElementById("spinner").style.display = "none";
+    document.getElementById("spinner-container").style.display = "none";
     document.getElementById("result").style.display = "block";
     document.querySelector('input[type=submit]').disabled = false;
     document.getElementById("result").scrollIntoView({ behavior: 'smooth' });

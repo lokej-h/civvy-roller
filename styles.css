@@ -48,7 +48,6 @@ button:disabled {
     height: 120px;
     animation: spin 0.5s linear infinite;
     margin: 50px auto;
-    display: none;
   }
   
   @keyframes spin {
@@ -61,6 +60,7 @@ button:disabled {
     top: 50vh;
     left: 50vw;
     transform: translate(-50%, -50%);
+    display: none;
 }
 
 #submit-button {
@@ -74,4 +74,8 @@ button:disabled {
     border-radius: 5px;
     font-size: 16px;
     cursor: pointer;
+}
+
+#result {
+    display: none;
 }
