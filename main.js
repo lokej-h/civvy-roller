@@ -9,10 +9,10 @@ function generateSkillsHTML(attributes) {
     for (let attribute of attributes.attributes) {
       html += `<div class="attribute">
                   <label>
-                    <input type="checkbox" name="${attribute.name}" value="${attribute.value}">
+                    <input type="checkbox" name="${attribute.name}" id="${attribute.name}" value="${attribute.value}">
                     ${attribute.name}:
                   </label>
-                  <input type="number" name="${attribute.name}_value" value="${attribute.value}">
+                  <input type="number" name="${attribute.name}_value" id="${attribute.name}_value" value="${attribute.value}">
                   <span class="description">${attribute.description}</span>
                </div>`;
     }
