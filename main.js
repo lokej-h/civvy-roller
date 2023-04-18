@@ -49,7 +49,7 @@ function generateSkillsHTML(attributes) {
   }
 
   // Add submit button
-  html += '<input type="submit" value="Submit">';
+  html += '<input type="submit" id="submit-button" value="Submit">';
 
   return html;
 }
@@ -229,6 +229,7 @@ function onSubmit(event) {
     document.getElementById("spinner").style.display = "none";
     document.getElementById("result").style.display = "block";
     document.querySelector('input[type=submit]').disabled = false;
+    document.getElementById("result").scrollIntoView({ behavior: 'smooth' });
   }, 500);
 }
 
