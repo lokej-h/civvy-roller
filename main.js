@@ -1,19 +1,19 @@
 function generateSkillsHTML(attributes) {
   let html = "";
 
-  if (attributes.abilities && attributes.abilities.length > 0) {
-    // Add abilities section heading and checkbox
-    html += `<h2>Abilities</h2>`;
+  if (attributes.attributes && attributes.attributes.length > 0) {
+    // Add attributes section heading and checkbox
+    html += `<h2>Attributes</h2>`;
 
-    // Add abilities with checkbox to each ability
-    for (let ability of attributes.abilities) {
-      html += `<div class="ability">
+    // Add attributes with checkbox to each attribute
+    for (let attribute of attributes.attributes) {
+      html += `<div class="attribute">
                   <label>
-                    <input type="checkbox" name="${ability.name}" value="${ability.value}">
-                    ${ability.name}:
+                    <input type="checkbox" name="${attribute.name}" value="${attribute.value}">
+                    ${attribute.name}:
                   </label>
-                  <input type="number" name="${ability.name}_value" value="${ability.value}">
-                  <span class="description">${ability.description}</span>
+                  <input type="number" name="${attribute.name}_value" value="${attribute.value}">
+                  <span class="description">${attribute.description}</span>
                </div>`;
     }
   }
@@ -102,8 +102,16 @@ function parseCSV(csv) {
 
     return cells;
   });
-  const abilities = [];
+  const attributes = [];
   const skills = [];
+
+  // Find abilties column
+  // we know it is in the first row
+  let attributeColumnOffset = lines[0].findIndex((cell) => cell.includes("Attributes"));
+  if (attributeColumnOffset === -1) {
+    throw new Error("Unable to find attributes section");
+  }
+  console.log(attributeColumnOffset);
 
   // Find start of skills section
   let skillStartIndex = lines.findIndex((row) => row[0].includes("Skills"));
@@ -114,14 +122,15 @@ function parseCSV(csv) {
   // Get skill categories
   const skillCategories = lines[skillStartIndex + 1];
 
-  // Parse abilities section
-  for (let i = 0; i < skillStartIndex - 1; i += 2) {
-    const ability = {
-      name: lines[i][0],
-      description: lines[i + 1][0],
-      value: lines[i + 1][1],
+  // Parse attributes section
+  for (let i = 3; i < skillStartIndex - 1; i += 2) {
+    const attribute = {
+      name: lines[i][attributeColumnOffset],
+      description: lines[i + 1][attributeColumnOffset],
+      value: lines[i + 1][attributeColumnOffset+1],
     };
-    abilities.push(ability);
+    if (attribute.name !== "")
+      attributes.push(attribute);
   }
 
   // Parse skills section
@@ -143,7 +152,7 @@ function parseCSV(csv) {
     }
   }
 
-  return { abilities, skills };
+  return { attributes, skills };
 }
 
 function readCSV(file, callback) {
@@ -171,10 +180,10 @@ function submitHandler(event) {
   event.preventDefault();
 
   let totalRoll = 0;
-  const selectedAbilities = document.querySelectorAll('input[name="ability"]:checked');
+  const selectedAttributes = document.querySelectorAll('input[name="attribute"]:checked');
   const selectedSkills = document.querySelectorAll('input[name="skill"]:checked');
 
-  for (let ability of selectedAbilities) {
+  for (let attribute of selectedAttributes) {
     totalRoll += calculateRoll(1);
   }
 
@@ -188,7 +197,7 @@ function submitHandler(event) {
 function onSubmit(event) {
   event.preventDefault();
 
-  // Get selected abilities and skills
+  // Get selected attributes and skills
   const selected = [];
   const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
   for (let checkbox of checkboxes) {
