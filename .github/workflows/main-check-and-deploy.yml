@@ -1,0 +1,19 @@
+name: Check and Deploy
+
+on:
+  # Trigger the workflow on push or pull request,
+  # but only for the main branch
+  push:
+    branches: 
+     - main
+     - release/*
+  pull_request:
+    branches:
+     - main
+
+jobs:
+  run-linters:
+    uses: ./.github/workflows/linters.yml
+  deploy:
+    needs: run-linters
+    uses: ./.github/workflows/static.yml
