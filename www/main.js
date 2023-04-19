@@ -67,7 +67,7 @@ function handleFile() {
   const file = input.files[0];
   const reader = new FileReader();
   reader.readAsText(file);
-  reader.onload = function() {
+  reader.onload = function () {
     const csv = reader.result;
     loadCSV(csv);
   }
@@ -114,7 +114,7 @@ function parseCSV(csv) {
   const skills = [];
   //const vehicleStats = [][];
 
-  // Find abilties column
+  // Find abilities column
   // we know it is in the first row
   let attributeColumnOffset = lines[0].findIndex((cell) => cell.includes("Attributes"));
   if (attributeColumnOffset === -1) {
@@ -136,7 +136,7 @@ function parseCSV(csv) {
     const attribute = {
       name: lines[i][attributeColumnOffset],
       description: lines[i + 1][attributeColumnOffset],
-      value: lines[i + 1][attributeColumnOffset+1],
+      value: lines[i + 1][attributeColumnOffset + 1],
     };
     if (attribute.name !== "")
       attributes.push(attribute);
@@ -151,7 +151,7 @@ function parseCSV(csv) {
         const skill = {
           name: lines[row][column],
           category: category,
-          description: lines[row + 1][column+1],
+          description: lines[row + 1][column + 1],
           value: lines[row + 1][column],
         };
         skills.push(skill);
@@ -187,7 +187,7 @@ function calculateRoll(n) {
 
 function diceRollDistribution(numDice) {
   const numSides = 6;
-  const distribution = new Array(numDice*6).fill(0);
+  const distribution = new Array(numDice * 6).fill(0);
 
   // Define a helper function to recursively calculate the distribution
   function calculateDistribution(rolls, remainingDice) {
@@ -214,17 +214,16 @@ function diceRollDistribution(numDice) {
 
 
 
-function probRollLower(target, numrolls,distribution) {
-  let numbelow = 0;
-  const totalOutcomes = Math.pow(6, numrolls);
-  
+function probRollLower(target, numRolls, distribution) {
+  let numBelow = 0;
+  const totalOutcomes = Math.pow(6, numRolls);
 
-  for (let i = 0; i <= target; i++)
-  {
-    numbelow += distribution[i];
+
+  for (let i = 0; i <= target; i++) {
+    numBelow += distribution[i];
   }
 
-  return Math.floor((numbelow/totalOutcomes)*100);
+  return Math.floor((numBelow / totalOutcomes) * 100);
 }
 
 
@@ -234,30 +233,30 @@ function onSubmit(event) {
   if (event.submitter.id === 'odds-button') {
     onOdds(event);
   }
-  else{
+  else {
     // Get selected attributes and skills
     const selected = [];
     const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
     for (let checkbox of checkboxes) {
-      selected.push(document.getElementById(checkbox.id+"_value").valueAsNumber);
+      selected.push(document.getElementById(checkbox.id + "_value").valueAsNumber);
     }
 
     var advantageData = document.getElementById('advantage');
-    var advantagevalue = Number(advantageData.value);
+    var advantageValue = Number(advantageData.value);
     let numRolls = selected.length;
 
-    if(numRolls!= 0){
+    if (numRolls != 0) {
       // Generate random numbers and sum
       // Get user input for total roll
       const totalSelected = selected.reduce((prev, curr) => prev + curr, 0);
-      const totalSelectedAdvantage = totalSelected + advantagevalue;
+      const totalSelectedAdvantage = totalSelected + advantageValue;
       const totalRoll = calculateRoll(numRolls);
       let snakeEyesComment = "";
 
       if (totalRoll === numRolls) {
         snakeEyesComment = `SNAKE EYES! Mark your attribute for level up  `
       };
-      if (totalRoll === numRolls*6) {
+      if (totalRoll === numRolls * 6) {
         snakeEyesComment = `Crit Fail! Add a Tomino Token because you're gonna have a bad time...`
       };
 
@@ -303,20 +302,20 @@ function onOdds(event) {
   const selected = [];
   const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
   for (let checkbox of checkboxes) {
-    selected.push(document.getElementById(checkbox.id+"_value").valueAsNumber);
+    selected.push(document.getElementById(checkbox.id + "_value").valueAsNumber);
   }
 
   var advantageData = document.getElementById('advantage');
-  var advantagevalue = Number(advantageData.value);
+  var advantageValue = Number(advantageData.value);
   let numRolls = selected.length;
 
-  if(numRolls!= 0){
+  if (numRolls != 0) {
     // Generate random numbers and sum
     // Get user input for total roll
     const totalSelected = selected.reduce((prev, curr) => prev + curr, 0);
-    const totalSelectedAdvantage = totalSelected + advantagevalue;
+    const totalSelectedAdvantage = totalSelected + advantageValue;
     const distribution = diceRollDistribution(numRolls);
-    const rollProbabilty = probRollLower(totalSelectedAdvantage,numRolls,distribution);
+    const rollProbability = probRollLower(totalSelectedAdvantage, numRolls, distribution);
 
     // do a little spinny for the UI
     document.getElementById("spinner-container").style.display = "block";
@@ -325,10 +324,10 @@ function onOdds(event) {
     document.querySelector('input[type=submit]').disabled = true;
 
     setTimeout(() => {
-      //output probabability of success
-      
+      // output probability of success
+
       const probabilityElement = document.getElementById('probability');
-      probabilityElement.textContent = `distribution of rolls is ${distribution.toString()} and the probability success is ${rollProbabilty}%`;
+      probabilityElement.textContent = `distribution of rolls is ${distribution.toString()} and the probability success is ${rollProbability}%`;
 
       document.getElementById("spinner-container").style.display = "none";
       document.getElementById("probability").style.display = "block";
@@ -351,7 +350,7 @@ function loadCSV(csv) {
     onSubmit(event);
   });
 
-  }
+}
 // fetch("skills.csv")
 //   .then((response) => response.text())
 //   .then((text) => {
