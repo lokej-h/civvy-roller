@@ -9,7 +9,8 @@ function generateSkillsHTML(attributes) {
     for (let attribute of attributes.attributes) {
       html += `<div class="attribute">
                   <label>
-                    <input type="checkbox" name="${attribute.name}" id="${attribute.name}" value="${attribute.value}">
+                    <input type="checkbox" name="${attribute.name}1" id="${attribute.name}" value="${attribute.value}">
+                    <input type="checkbox" name="${attribute.name}2" id="${attribute.name}" value="${attribute.value}">
                     ${attribute.name}:
                   </label>
                   <input type="number" name="${attribute.name}_value" id="${attribute.name}_value" value="${attribute.value}">
@@ -38,7 +39,8 @@ function generateSkillsHTML(attributes) {
       for (let skill of groupedSkills[category]) {
         html += `<div class="skill">
                     <label>
-                      <input type="checkbox" name="${skill.name}" id="${skill.name}" value="${skill.value}">
+                      <input type="checkbox" name="${skill.name}1" id="${skill.name}" value="${skill.value}">
+                      <input type="checkbox" name="${skill.name}2" id="${skill.name}" value="${skill.value}">
                       ${skill.name}
                     </label>
                     <input type="number" name="${skill.name}_value" id="${skill.name}_value" value="${skill.value}">
@@ -48,8 +50,14 @@ function generateSkillsHTML(attributes) {
     }
   }
 
+  html += '<label for="advantage">Enter the advantage/disadvantage to the roll: </label>'
+  html += '<input type="number" id="advantage" name="advantage" min="-5" max="5" step="1" value="0"></input>'
+
   // Add submit button
   html += '<input type="submit" id="submit-button" value="Submit">';
+
+  // Add odds button
+  html += '<input type="submit" id="odds-button" value="Show me the Odds">';
 
   return html;
 }
@@ -104,6 +112,7 @@ function parseCSV(csv) {
   });
   const attributes = [];
   const skills = [];
+  //const vehicleStats = [][];
 
   // Find abilties column
   // we know it is in the first row
@@ -170,12 +179,190 @@ function readCSV(file, callback) {
 function calculateRoll(n) {
   let sum = 0;
   for (let i = 0; i < n; i++) {
-    let roll = window.crypto.getRandomValues(new Uint8Array(1))[0] % 6 + 1;
-    sum += roll;
+    sum += window.crypto.getRandomValues(new Uint8Array(1))[0] % 6 + 1;
   }
   return sum;
 }
 
+
+function diceRollDistribution(numDice) {
+  const numSides = 6;
+  const distribution = new Array(numDice*6).fill(0);
+
+  // Define a helper function to recursively calculate the distribution
+  function calculateDistribution(rolls, remainingDice) {
+    if (remainingDice === 0) {
+      // Base case: we have rolled all the dice, so calculate the sum of the rolls
+      const sum = rolls.reduce((acc, cur) => acc + cur, 0);
+      if (distribution[sum] === undefined) {
+        distribution[sum] = 0;
+      }
+      distribution[sum]++;
+    } else {
+      // Recursive case: roll one die and recurse with one less die
+      for (let i = 1; i <= numSides; i++) {
+        calculateDistribution([...rolls, i], remainingDice - 1);
+      }
+    }
+  }
+
+  // Call the helper function to calculate the distribution
+  calculateDistribution([], numDice);
+
+  return distribution;
+}
+
+
+
+function probRollLower(target, numrolls,distribution) {
+  let numbelow = 0;
+  const totalOutcomes = Math.pow(6, numrolls);
+  
+
+  for (let i = 0; i <= target; i++)
+  {
+    numbelow += distribution[i];
+  }
+
+  return Math.floor((numbelow/totalOutcomes)*100);
+}
+
+
+function onSubmit(event) {
+  event.preventDefault();
+
+  if (event.submitter.id === 'odds-button') {
+    onOdds(event);
+  }
+  else{
+    // Get selected attributes and skills
+    const selected = [];
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+    for (let checkbox of checkboxes) {
+      selected.push(document.getElementById(checkbox.id+"_value").valueAsNumber);
+    }
+
+    var advantageData = document.getElementById('advantage');
+    var advantagevalue = Number(advantageData.value);
+    let numRolls = selected.length;
+
+    if(numRolls!= 0){
+      // Generate random numbers and sum
+      // Get user input for total roll
+      const totalSelected = selected.reduce((prev, curr) => prev + curr, 0);
+      const totalSelectedAdvantage = totalSelected + advantagevalue;
+      const totalRoll = calculateRoll(numRolls);
+      let snakeEyesComment = "";
+
+      if (totalRoll === numRolls) {
+        snakeEyesComment = `SNAKE EYES! Mark your attribute for level up  `
+      };
+      if (totalRoll === numRolls*6) {
+        snakeEyesComment = `Crit Fail! Add a Tomino Token because you're gonna have a bad time...`
+      };
+
+      // do a little spinny for the UI
+      document.getElementById("spinner-container").style.display = "block";
+      document.getElementById("result").style.display = "none";
+      document.getElementById("probability").style.display = "none";
+      document.querySelector('input[type=submit]').disabled = true;
+
+      setTimeout(() => {
+        // Compare selected total to user input total
+        const resultElement = document.getElementById('result');
+        if (totalSelectedAdvantage > totalRoll) {
+          resultElement.style.color = "green";
+          resultElement.textContent = snakeEyesComment + `${totalSelectedAdvantage - totalRoll} Successes! 
+          Rolled: ${totalRoll} 
+          against your stats: ${totalSelectedAdvantage}`;
+        } else if (totalSelectedAdvantage === totalRoll) {
+          resultElement.style.color = "green";
+          resultElement.textContent = snakeEyesComment + `Match! 
+          Rolled: ${totalRoll} 
+          against your stats: ${totalSelectedAdvantage}`;
+        } else {
+          resultElement.style.color = "red";
+          resultElement.textContent = snakeEyesComment + `${totalRoll - totalSelectedAdvantage} Failures... 
+            Rolled: ${totalRoll} 
+            against your stats: ${totalSelectedAdvantage}`;
+        }
+
+        document.getElementById("spinner-container").style.display = "none";
+        document.getElementById("result").style.display = "block";
+        document.querySelector('input[type=submit]').disabled = false;
+        document.getElementById("result").scrollIntoView({ behavior: 'smooth' });
+      }, 500);
+    }
+  }
+}
+
+function onOdds(event) {
+  event.preventDefault();
+
+  // Get selected attributes and skills
+  const selected = [];
+  const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+  for (let checkbox of checkboxes) {
+    selected.push(document.getElementById(checkbox.id+"_value").valueAsNumber);
+  }
+
+  var advantageData = document.getElementById('advantage');
+  var advantagevalue = Number(advantageData.value);
+  let numRolls = selected.length;
+
+  if(numRolls!= 0){
+    // Generate random numbers and sum
+    // Get user input for total roll
+    const totalSelected = selected.reduce((prev, curr) => prev + curr, 0);
+    const totalSelectedAdvantage = totalSelected + advantagevalue;
+    const distribution = diceRollDistribution(numRolls);
+    const rollProbabilty = probRollLower(totalSelectedAdvantage,numRolls,distribution);
+
+    // do a little spinny for the UI
+    document.getElementById("spinner-container").style.display = "block";
+    document.getElementById("result").style.display = "none";
+    document.getElementById("probability").style.display = "none";
+    document.querySelector('input[type=submit]').disabled = true;
+
+    setTimeout(() => {
+      //output probabability of success
+      
+      const probabilityElement = document.getElementById('probability');
+      probabilityElement.textContent = `distribution of rolls is ${distribution.toString()} and the probability success is ${rollProbabilty}%`;
+
+      document.getElementById("spinner-container").style.display = "none";
+      document.getElementById("probability").style.display = "block";
+      document.querySelector('input[type=submit]').disabled = false;
+      document.getElementById("probability").scrollIntoView({ behavior: 'smooth' });
+    }, 500);
+  }
+}
+
+function loadCSV(csv) {
+  const skills = parseCSV(csv);
+  const skillsHTML = generateSkillsHTML(skills);
+
+  // Add skills to DOM
+  document.querySelector("#skills").innerHTML = skillsHTML;
+
+  // add event listener
+  document.getElementById('skills').addEventListener("submit", (event) => {
+    event.preventDefault();
+    onSubmit(event);
+  });
+
+  }
+// fetch("skills.csv")
+//   .then((response) => response.text())
+//   .then((text) => {
+//     const skills = parseCSV(text);
+//     console.log(skills);
+//   });
+
+
+
+
+/*
 function submitHandler(event) {
   event.preventDefault();
 
@@ -193,74 +380,4 @@ function submitHandler(event) {
 
   console.log(`Total roll: ${totalRoll}`);
 }
-
-function onSubmit(event) {
-  event.preventDefault();
-
-  // Get selected attributes and skills
-  const selected = [];
-  const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
-  for (let checkbox of checkboxes) {
-    selected.push(document.getElementById(checkbox.id+"_value").valueAsNumber);
-  }
-
-  // Generate random numbers and sum
-  const totalRoll = calculateRoll(selected.length);
-  let snakeEyesComment = "";
-  if (totalRoll === selected.length) {
-    snakeEyesComment = `SNAKE EYES! ALL ROLLS WERE 1!!!     `
-  };
-
-  // Get user input for total roll
-  const totalSelected = selected.reduce((prev, curr) => prev + curr, 0);
-
-  // do a little spinny for the UI
-  document.getElementById("spinner-container").style.display = "block";
-  document.getElementById("result").style.display = "none";
-  document.querySelector('input[type=submit]').disabled = true;
-
-  setTimeout(() => {
-    // Compare selected total to user input total
-    const resultElement = document.getElementById('result');
-    if (totalSelected > totalRoll) {
-      resultElement.textContent = snakeEyesComment + `${totalSelected - totalRoll} Successes! 
-      Rolled: ${totalRoll} 
-      against your stats: ${totalSelected}`;
-    } else if (totalSelected === totalRoll) {
-      resultElement.textContent = snakeEyesComment + `Match! 
-      Rolled: ${totalRoll} 
-      against your stats: ${totalSelected}`;
-    } else {
-      resultElement.textContent = snakeEyesComment + `${totalRoll - totalSelected} Failures... 
-        Rolled: ${totalRoll} 
-        against your stats: ${totalSelected}`;
-    }
-    document.getElementById("spinner-container").style.display = "none";
-    document.getElementById("result").style.display = "block";
-    document.querySelector('input[type=submit]').disabled = false;
-    document.getElementById("result").scrollIntoView({ behavior: 'smooth' });
-  }, 500);
-}
-
-
-
-
-  function loadCSV(csv) {
-    const skills = parseCSV(csv);
-    const skillsHTML = generateSkillsHTML(skills);
-
-    // Add skills to DOM
-    document.querySelector("#skills").innerHTML = skillsHTML;
-
-    // add event listener
-    document.getElementById('skills').addEventListener("submit", (event) => {
-      event.preventDefault();
-      onSubmit(event);
-    });
-  }
-// fetch("skills.csv")
-//   .then((response) => response.text())
-//   .then((text) => {
-//     const skills = parseCSV(text);
-//     console.log(skills);
-//   });
+*/
