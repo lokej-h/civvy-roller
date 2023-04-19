@@ -73,12 +73,6 @@ function handleFile() {
   }
 }
 
-function loadCharacterSheet() {
-  readCSV("skills.csv", function (csv) {
-    loadCSV(csv);
-  });
-}
-
 function parseCSV(csv) {
   const lines = csv.split("\n").map((line) => {
     const cells = [];
@@ -351,32 +345,3 @@ function loadCSV(csv) {
   });
 
 }
-// fetch("skills.csv")
-//   .then((response) => response.text())
-//   .then((text) => {
-//     const skills = parseCSV(text);
-//     console.log(skills);
-//   });
-
-
-
-
-/*
-function submitHandler(event) {
-  event.preventDefault();
-
-  let totalRoll = 0;
-  const selectedAttributes = document.querySelectorAll('input[name="attribute"]:checked');
-  const selectedSkills = document.querySelectorAll('input[name="skill"]:checked');
-
-  for (let attribute of selectedAttributes) {
-    totalRoll += calculateRoll(1);
-  }
-
-  for (let skill of selectedSkills) {
-    totalRoll += calculateRoll(1);
-  }
-
-  console.log(`Total roll: ${totalRoll}`);
-}
-*/
