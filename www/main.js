@@ -6,7 +6,7 @@ function generateSkillsHTML(attributes) {
     html += `<h2>Attributes</h2>`;
 
     // Add attributes with checkbox to each attribute
-    for (let attribute of attributes.attributes) {
+    for (const attribute of attributes.attributes) {
       html += `<div class="attribute">
                   <label>
                     <input type="checkbox" name="${attribute.name}1" id="${attribute.name}" value="${attribute.value}">
@@ -25,7 +25,7 @@ function generateSkillsHTML(attributes) {
 
     // Group skills by category
     const groupedSkills = {};
-    for (let skill of attributes.skills) {
+    for (const skill of attributes.skills) {
       if (!groupedSkills[skill.category]) {
         groupedSkills[skill.category] = [];
       }
@@ -34,9 +34,9 @@ function generateSkillsHTML(attributes) {
     // console.log(groupedSkills)
 
     // Add skills with checkbox to each skill
-    for (let category in groupedSkills) {
+    for (const category in groupedSkills) {
       html += `<h3>${category}</h3>`;
-      for (let skill of groupedSkills[category]) {
+      for (const skill of groupedSkills[category]) {
         html += `<div class="skill">
                     <label>
                       <input type="checkbox" name="${skill.name}1" id="${skill.name}" value="${skill.value}">
@@ -106,18 +106,18 @@ function parseCSV(csv) {
   });
   const attributes = [];
   const skills = [];
-  //const vehicleStats = [][];
+  // const vehicleStats = [][];
 
   // Find abilities column
   // we know it is in the first row
-  let attributeColumnOffset = lines[0].findIndex((cell) => cell.includes("Attributes"));
+  const attributeColumnOffset = lines[0].findIndex((cell) => cell.includes("Attributes"));
   if (attributeColumnOffset === -1) {
     throw new Error("Unable to find attributes section");
   }
   console.log(attributeColumnOffset);
 
   // Find start of skills section
-  let skillStartIndex = lines.findIndex((row) => row[0].includes("Skills"));
+  const skillStartIndex = lines.findIndex((row) => row[0].includes("Skills"));
   if (skillStartIndex === -1) {
     throw new Error("Unable to find start of skills section");
   }
@@ -144,7 +144,7 @@ function parseCSV(csv) {
       while (lines[row][column] !== "") {
         const skill = {
           name: lines[row][column],
-          category: category,
+          category,
           description: lines[row + 1][column + 1],
           value: lines[row + 1][column],
         };
@@ -231,13 +231,13 @@ function onSubmit(event) {
     // Get selected attributes and skills
     const selected = [];
     const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
-    for (let checkbox of checkboxes) {
+    for (const checkbox of checkboxes) {
       selected.push(document.getElementById(checkbox.id + "_value").valueAsNumber);
     }
 
-    var advantageData = document.getElementById('advantage');
-    var advantageValue = Number(advantageData.value);
-    let numRolls = selected.length;
+    const advantageData = document.getElementById('advantage');
+    const advantageValue = Number(advantageData.value);
+    const numRolls = selected.length;
 
     if (numRolls != 0) {
       // Generate random numbers and sum
@@ -295,13 +295,13 @@ function onOdds(event) {
   // Get selected attributes and skills
   const selected = [];
   const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
-  for (let checkbox of checkboxes) {
+  for (const checkbox of checkboxes) {
     selected.push(document.getElementById(checkbox.id + "_value").valueAsNumber);
   }
 
-  var advantageData = document.getElementById('advantage');
-  var advantageValue = Number(advantageData.value);
-  let numRolls = selected.length;
+  const advantageData = document.getElementById('advantage');
+  const advantageValue = Number(advantageData.value);
+  const numRolls = selected.length;
 
   if (numRolls != 0) {
     // Generate random numbers and sum
