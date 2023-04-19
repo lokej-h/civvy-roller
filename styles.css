@@ -8,6 +8,12 @@
   margin: 10px;
 }
 
+#probability {
+  border: 1px solid black;
+  padding: 10px;
+  margin: 10px;
+}
+
 /* Target the headers */
 h2 {
   font-size: 24px;
@@ -74,6 +80,23 @@ button:disabled {
     border-radius: 5px;
     font-size: 16px;
     cursor: pointer;
+}
+
+#odds-button {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  padding: 10px 20px;
+  background-color: #a16100;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+#probability {
+    display: none;
 }
 
 #result {
