@@ -1,0 +1,81 @@
+/* styles.css */
+
+/* Target the character sheet and result div */
+#character-sheet,
+#result {
+  border: 1px solid black;
+  padding: 10px;
+  margin: 10px;
+}
+
+/* Target the headers */
+h2 {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+h3 {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+/* Target the abilities and skills */
+.ability,
+.skill {
+  margin-bottom: 10px;
+}
+
+/* Target the checkboxes */
+input[type="checkbox"] {
+  margin-right: 5px;
+}
+
+/* Target the descriptions */
+.description {
+  font-style: italic;
+}
+
+button:disabled {
+    opacity: 0.33;
+    pointer-events: none;
+}
+
+#spinner {
+    border: 16px solid #f3f3f3;
+    border-top: 16px solid #3498db;
+    border-radius: 50%;
+    width: 120px;
+    height: 120px;
+    animation: spin 0.5s linear infinite;
+    margin: 50px auto;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  #spinner-container {
+    position: fixed;
+    top: 50vh;
+    left: 50vw;
+    transform: translate(-50%, -50%);
+    display: none;
+}
+
+#submit-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+#result {
+    display: none;
+}
