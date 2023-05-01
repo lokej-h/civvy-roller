@@ -1,3 +1,10 @@
+/**
+ * The function generates HTML code for a form that includes attributes and skills with checkboxes and
+ * input fields, as well as an advantage/disadvantage input and submit buttons.
+ * @param {characterObject} attributes - An object containing two properties: "attributes" and "skills".
+ * @returns an HTML string that includes checkboxes and input fields for attributes and skills, as well
+ * as a label and input field for advantage/disadvantage and submit/odds buttons.
+ */
 function generateSkillsHTML(attributes) {
   let html = "";
 
@@ -64,6 +71,9 @@ function generateSkillsHTML(attributes) {
   return html;
 }
 
+/**
+ * This function handles a file input by reading a CSV file and loading its contents.
+ */
 function handleFile() {
   const input = document.getElementById("file-input");
   const file = input.files[0];
@@ -75,7 +85,16 @@ function handleFile() {
   };
 }
 
+/**
+ * The function parses a CSV file and extracts attributes and skills data.
+ * @param {str} csv - The CSV string that needs to be parsed into an object.
+ * @returns {characterObject} An object with two properties: "attributes" and "skills".
+ */
 function parseCSV(csv) {
+  /**
+    * bulk of processing, convert the comma delimited csv into "lines"
+    * each line is a row so we can index by row-column format e.g. line[row][column]
+    */
   const lines = csv.split("\n").map((line) => {
     const cells = [];
     let currentCell = "";
@@ -161,6 +180,14 @@ function parseCSV(csv) {
   return { attributes, skills };
 }
 
+/**
+ * The function reads a CSV file using XMLHttpRequest and passes the data to a callback function.
+ * @param file - The file parameter is a string that represents the path to the CSV file that needs to
+ * be read.
+ * @param callback - The callback parameter is a function that will be called once the CSV file has
+ * been successfully retrieved by the XMLHttpRequest. The function will be passed the CSV data as an
+ * argument.
+ */
 function readCSV(file, callback) {
   const xhr = new XMLHttpRequest();
   xhr.open("GET", file);
@@ -173,6 +200,16 @@ function readCSV(file, callback) {
   xhr.send();
 }
 
+/**
+ * The function calculates the sum of n random rolls of a six-sided die using the
+ * window.crypto.getRandomValues method.
+ * @param n - The parameter "n" represents the number of times a dice is rolled. The function
+ * "calculateRoll" uses a loop to roll a dice "n" times and calculates the sum of the values obtained
+ * in each roll. The function uses the window.crypto.getRandomValues method to generate a random number
+ * between
+ * @returns The function `calculateRoll` returns the sum of `n` random dice rolls, where each roll is a
+ * random integer between 1 and 6 (inclusive).
+ */
 function calculateRoll(n) {
   let sum = 0;
   for (let i = 0; i < n; i++) {
@@ -181,6 +218,14 @@ function calculateRoll(n) {
   return sum;
 }
 
+/**
+ * This function calculates the distribution of possible outcomes when rolling a given number of dice
+ * with six sides each.
+ * @param numDice - The number of dice being rolled.
+ * @returns The function `diceRollDistribution` returns an array representing the distribution of
+ * possible sums when rolling a given number of dice with six sides. The array has a length of `numDice
+ * * 6` and each element represents the number of times a particular sum was rolled.
+ */
 function diceRollDistribution(numDice) {
   const numSides = 6;
   const distribution = new Array(numDice * 6).fill(0);
@@ -208,6 +253,18 @@ function diceRollDistribution(numDice) {
   return distribution;
 }
 
+/**
+ * The function calculates the probability of rolling a target or lower value on a specified number of
+ * dice rolls with a given distribution.
+ * @param target - The target is the number that we want to roll lower than or equal to in order to
+ * count as a success.
+ * @param numRolls - The number of times a six-sided die is rolled.
+ * @param distribution - The distribution parameter is an array that represents the number of possible
+ * outcomes for each possible roll result. For example, if we are rolling a single six-sided die, the
+ * distribution array would be [1, 1, 1, 1, 1, 1] because there is one possible
+ * @returns the probability (as a percentage) of rolling a value lower than or equal to the target
+ * value, given a certain number of rolls and a distribution of outcomes.
+ */
 function probRollLower(target, numRolls, distribution) {
   let numBelow = 0;
   const totalOutcomes = Math.pow(6, numRolls);
@@ -219,6 +276,12 @@ function probRollLower(target, numRolls, distribution) {
   return Math.floor((numBelow / totalOutcomes) * 100);
 }
 
+/**
+ * The function handles form submission events and delegates to different handlers based on which
+ * button was clicked.
+ * @param event - The event parameter is an object that represents an event that occurred in the
+ * browser, such as a button click or form submission.
+ */
 function onSubmit(event) {
   event.preventDefault();
 
@@ -350,6 +413,11 @@ function onOdds(event) {
   }
 }
 
+/**
+ * The function loads a CSV file, parses it, generates HTML from the parsed data, adds the HTML to the
+ * DOM, and adds an event listener to the skills form.
+ * @param csv - a string containing comma-separated values (CSV) representing skills data.
+ */
 function loadCSV(csv) {
   const skills = parseCSV(csv);
   const skillsHTML = generateSkillsHTML(skills);
