@@ -46,26 +46,30 @@ input[type="checkbox"] {
 }
 
 #spinner {
-    border: 16px solid #f3f3f3;
-    border-top: 16px solid #3498db;
-    border-radius: 50%;
-    width: 120px;
-    height: 120px;
-    animation: spin 0.5s linear infinite;
-    margin: 50px auto;
-  }
-  
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
+  border: 16px solid #f3f3f3;
+  border-top: 16px solid #3498db;
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  animation: spin 0.5s linear infinite;
+  margin: 50px auto;
+}
 
-  #spinner-container {
-    position: fixed;
-    top: 50vh;
-    left: 50vw;
-    transform: translate(-50%, -50%);
-    display: none;
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+#spinner-container {
+  position: fixed;
+  top: 50vh;
+  left: 50vw;
+  transform: translate(-50%, -50%);
+  display: none;
 }
 
 .action-button {
@@ -80,13 +84,13 @@ input[type="checkbox"] {
 }
 
 .action-button:disabled {
-    opacity: 0.33;
-    pointer-events: none;
+  opacity: 0.33;
+  pointer-events: none;
 }
 
 #submit-button {
-    bottom: 20px;
-    background-color: #007bff;
+  bottom: 20px;
+  background-color: #007bff;
 }
 
 #odds-button {
@@ -95,9 +99,9 @@ input[type="checkbox"] {
 }
 
 #probability {
-    display: none;
+  display: none;
 }
 
 #result {
-    display: none;
+  display: none;
 }

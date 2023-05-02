@@ -14,17 +14,18 @@ function generateSkillsHTML(attributes) {
 
   html += attributes.vehicles.makeHTML();
 
-  html +=
-    `<h2>Advantage</h2>
+  html += `<h2>Advantage</h2>
     <label for="advantage">Enter the advantage/disadvantage to the roll: </label>`;
   html +=
     '<input type="number" id="advantage" name="advantage" min="-5" max="5" step="1" value="0"></input>';
 
   // Add submit button
-  html += '<input class="action-button" type="submit" id="submit-button" value="Submit">';
+  html +=
+    '<input class="action-button" type="submit" id="submit-button" value="Submit">';
 
   // Add odds button
-  html += '<input class="action-button" type="submit" id="odds-button" value="Show me the Odds">';
+  html +=
+    '<input class="action-button" type="submit" id="odds-button" value="Show me the Odds">';
 
   return html;
 }
@@ -155,7 +156,9 @@ function parseCSV(csv) {
       description: lines[i + 1][attributeColumnOffset],
       value: lines[i + 1][attributeColumnOffset + 1],
     };
-    attributes.add(new Attribute(attribute.name, attribute.value, attribute.description))
+    attributes.add(
+      new Attribute(attribute.name, attribute.value, attribute.description)
+    );
     // if (attribute.name !== "") attributes.push(attribute);
   }
 
@@ -171,7 +174,9 @@ function parseCSV(csv) {
           description: lines[row + 1][column + 1],
           value: lines[row + 1][column],
         };
-        skills.add(new Skill(skill.name, skill.value, skill.description, skill.category))
+        skills.add(
+          new Skill(skill.name, skill.value, skill.description, skill.category)
+        );
         // skills.push(skill);
         row++;
         row++;
@@ -212,9 +217,11 @@ function parseCSV(csv) {
     }
     vehicle.name = currentVehicle;
 
-    const vehicleClass = new Vehicle(vehicle.name, vehicle.specialDescription)
+    const vehicleClass = new Vehicle(vehicle.name, vehicle.specialDescription);
     for (const attribute of vehicle.attributes) {
-      vehicleClass.add(new VehicleStat(attribute.name, attribute.value, attribute.description))
+      vehicleClass.add(
+        new VehicleStat(attribute.name, attribute.value, attribute.description)
+      );
     }
     vehicles.add(vehicleClass);
     // vehicles.push(vehicle);
@@ -417,7 +424,7 @@ function startSpinner() {
   document.getElementById("probability").style.display = "none";
   // disable buttons
   for (const element in document.getElementsByClassName("action-button")) {
-    element.disabled = true
+    element.disabled = true;
   }
 }
 
@@ -473,13 +480,14 @@ function loadCSV(csv) {
 
   // add vehicle event listener
   const vehicleDropdown = document.getElementById("vehicle-select");
-  vehicleDropdown.addEventListener('change', () => {
+  vehicleDropdown.addEventListener("change", () => {
     const selectedVehicle = vehicleDropdown.value;
     const vehicle = properties.vehicles.getVehicle(selectedVehicle);
     if (vehicle === undefined) {
-      document.getElementById("vehicle-property-container").innerHTML = ""
+      document.getElementById("vehicle-property-container").innerHTML = "";
     } else {
-      document.getElementById("vehicle-property-container").innerHTML = vehicle.makeHTML()
+      document.getElementById("vehicle-property-container").innerHTML =
+        vehicle.makeHTML();
     }
-  })
+  });
 }
