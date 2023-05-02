@@ -24,8 +24,8 @@ jobs:
       - name: Install Node.js dependencies
         run: |
           npm init -y 
-          npm i eslint eslint-config-semistandard eslint-config-prettier prettier eslint-config-standard eslint-plugin-import eslint-plugin-n eslint-plugin-promise
-          echo 'module.exports = {	"env": {		"browser": true,		"es2021": true	},	"extends": [        "semistandard",        "prettier"    ],	"overrides": [	],	"parserOptions": {		"ecmaVersion": "latest"	}};' > .eslintrc.js
+          npm i eslint eslint-config-semistandard eslint-config-prettier prettier eslint-config-standard eslint-plugin-import eslint-plugin-n eslint-plugin-promise eslint-plugin-html
+          echo 'module.exports = {	"env": {		"browser": true,		"es2021": true	},	"plugins": ["html"], "extends": [        "semistandard",        "prettier"    ],	"overrides": [	],	"parserOptions": {		"ecmaVersion": "latest"	}};' > .eslintrc.js
 
       - name: Run linters
         uses: wearerequired/lint-action@v2
