@@ -276,6 +276,50 @@ function probRollLower(target, numRolls, distribution) {
   return Math.floor((numBelow / totalOutcomes) * 100);
 }
 
+function extractSelected() {
+  // Get selected attributes and skills
+  const selected = [];
+  const checkboxes = document.querySelectorAll(
+    'input[type="checkbox"]:checked'
+  );
+  for (const checkbox of checkboxes) {
+    selected.push(
+      document.getElementById(checkbox.id + "_value").valueAsNumber
+    );
+  }
+
+  const advantageData = document.getElementById("advantage");
+  const advantageValue = Number(advantageData.value);
+  const numRolls = selected.length;
+
+  // Generate random numbers and sum
+  // Get user input for total roll
+  const totalSelected = selected.reduce((prev, curr) => prev + curr, 0);
+  const totalSelectedAdvantage = totalSelected + advantageValue;
+  return { numRolls, totalSelectedAdvantage };
+}
+
+function startSpinner() {
+  document.getElementById("spinner-container").style.display = "block";
+  // hide divs
+  document.getElementById("result").style.display = "none";
+  document.getElementById("probability").style.display = "none";
+  // disable buttons
+  document.querySelector("input[type=submit]").disabled = true;
+}
+
+function stopSpinner() {
+  document.getElementById("spinner-container").style.display = "none";
+  document.querySelector("input[type=submit]").disabled = false;
+}
+
+function showAndScrollToID(id) {
+  document.getElementById(id).style.display = "block";
+  document
+    .getElementById(id)
+    .scrollIntoView({ behavior: "smooth" });
+}
+
 /**
  * The function handles form submission events and delegates to different handlers based on which
  * button was clicked.
