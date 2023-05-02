@@ -276,6 +276,94 @@ function probRollLower(target, numRolls, distribution) {
   return Math.floor((numBelow / totalOutcomes) * 100);
 }
 
+/**
+ * The function calculates the probability of success for a given set of dice rolls and displays it on
+ * the UI.
+ */
+function showOddsHandler() {
+  // Get selected attributes and skills
+  const { numRolls, totalSelectedAdvantage } = extractSelected();
+
+  const distribution = diceRollDistribution(numRolls);
+  const rollProbability = probRollLower(
+    totalSelectedAdvantage,
+    numRolls,
+    distribution
+  );
+
+  // early return
+  if (numRolls === 0) {
+    return;
+  }
+
+  // do a little spinny for the UI
+  startSpinner();
+
+  setTimeout(() => {
+    // output probability of success
+
+    const probabilityElement = document.getElementById("probability");
+    probabilityElement.textContent = `distribution of rolls is ${distribution.toString()} and the probability success is ${rollProbability}%`;
+
+    stopSpinner();
+    // show and scroll to section
+    showAndScrollToID("probability");
+  }, 500);
+}
+
+function rollAgainstSelectedHandler() {
+  // Get selected attributes and skills
+  const { numRolls, totalSelectedAdvantage } = extractSelected();
+
+  // early return
+  if (numRolls === 0) {
+    return;
+  }
+
+  const totalRoll = calculateRoll(numRolls);
+  let snakeEyesComment = "";
+
+  if (totalRoll === numRolls) {
+    snakeEyesComment = `SNAKE EYES! Mark your attribute for level up  `;
+  }
+  if (totalRoll === numRolls * 6) {
+    snakeEyesComment = `Crit Fail! Add a Tomino Token because you're gonna have a bad time...`;
+  }
+
+  // do a little spinny for the UI
+  startSpinner();
+
+  setTimeout(() => {
+    // Compare selected total to user input total
+    const resultElement = document.getElementById("result");
+    if (totalSelectedAdvantage > totalRoll) {
+      resultElement.style.color = "green";
+      resultElement.textContent =
+        snakeEyesComment +
+        `${totalSelectedAdvantage - totalRoll} Successes! 
+        Rolled: ${totalRoll} 
+        against your stats: ${totalSelectedAdvantage}`;
+    } else if (totalSelectedAdvantage === totalRoll) {
+      resultElement.style.color = "green";
+      resultElement.textContent =
+        snakeEyesComment +
+        `Match! 
+        Rolled: ${totalRoll} 
+        against your stats: ${totalSelectedAdvantage}`;
+    } else {
+      resultElement.style.color = "red";
+      resultElement.textContent =
+        snakeEyesComment +
+        `${totalRoll - totalSelectedAdvantage} Failures... 
+          Rolled: ${totalRoll} 
+          against your stats: ${totalSelectedAdvantage}`;
+    }
+
+    stopSpinner();
+    showAndScrollToID("result");
+  }, 500);
+}
+
 function extractSelected() {
   // Get selected attributes and skills
   const selected = [];
@@ -329,131 +417,16 @@ function showAndScrollToID(id) {
 function onSubmit(event) {
   event.preventDefault();
 
-  if (event.submitter.id === "odds-button") {
-    onOdds(event);
-  } else {
-    // Get selected attributes and skills
-    const selected = [];
-    const checkboxes = document.querySelectorAll(
-      'input[type="checkbox"]:checked'
-    );
-    for (const checkbox of checkboxes) {
-      selected.push(
-        document.getElementById(checkbox.id + "_value").valueAsNumber
-      );
-    }
-
-    const advantageData = document.getElementById("advantage");
-    const advantageValue = Number(advantageData.value);
-    const numRolls = selected.length;
-
-    if (numRolls != 0) {
-      // Generate random numbers and sum
-      // Get user input for total roll
-      const totalSelected = selected.reduce((prev, curr) => prev + curr, 0);
-      const totalSelectedAdvantage = totalSelected + advantageValue;
-      const totalRoll = calculateRoll(numRolls);
-      let snakeEyesComment = "";
-
-      if (totalRoll === numRolls) {
-        snakeEyesComment = `SNAKE EYES! Mark your attribute for level up  `;
-      }
-      if (totalRoll === numRolls * 6) {
-        snakeEyesComment = `Crit Fail! Add a Tomino Token because you're gonna have a bad time...`;
-      }
-
-      // do a little spinny for the UI
-      document.getElementById("spinner-container").style.display = "block";
-      document.getElementById("result").style.display = "none";
-      document.getElementById("probability").style.display = "none";
-      document.querySelector("input[type=submit]").disabled = true;
-
-      setTimeout(() => {
-        // Compare selected total to user input total
-        const resultElement = document.getElementById("result");
-        if (totalSelectedAdvantage > totalRoll) {
-          resultElement.style.color = "green";
-          resultElement.textContent =
-            snakeEyesComment +
-            `${totalSelectedAdvantage - totalRoll} Successes! 
-          Rolled: ${totalRoll} 
-          against your stats: ${totalSelectedAdvantage}`;
-        } else if (totalSelectedAdvantage === totalRoll) {
-          resultElement.style.color = "green";
-          resultElement.textContent =
-            snakeEyesComment +
-            `Match! 
-          Rolled: ${totalRoll} 
-          against your stats: ${totalSelectedAdvantage}`;
-        } else {
-          resultElement.style.color = "red";
-          resultElement.textContent =
-            snakeEyesComment +
-            `${totalRoll - totalSelectedAdvantage} Failures... 
-            Rolled: ${totalRoll} 
-            against your stats: ${totalSelectedAdvantage}`;
-        }
-
-        document.getElementById("spinner-container").style.display = "none";
-        document.getElementById("result").style.display = "block";
-        document.querySelector("input[type=submit]").disabled = false;
-        document
-          .getElementById("result")
-          .scrollIntoView({ behavior: "smooth" });
-      }, 500);
-    }
-  }
-}
-
-function onOdds(event) {
-  event.preventDefault();
-
-  // Get selected attributes and skills
-  const selected = [];
-  const checkboxes = document.querySelectorAll(
-    'input[type="checkbox"]:checked'
-  );
-  for (const checkbox of checkboxes) {
-    selected.push(
-      document.getElementById(checkbox.id + "_value").valueAsNumber
-    );
-  }
-
-  const advantageData = document.getElementById("advantage");
-  const advantageValue = Number(advantageData.value);
-  const numRolls = selected.length;
-
-  if (numRolls != 0) {
-    // Generate random numbers and sum
-    // Get user input for total roll
-    const totalSelected = selected.reduce((prev, curr) => prev + curr, 0);
-    const totalSelectedAdvantage = totalSelected + advantageValue;
-    const distribution = diceRollDistribution(numRolls);
-    const rollProbability = probRollLower(
-      totalSelectedAdvantage,
-      numRolls,
-      distribution
-    );
-
-    // do a little spinny for the UI
-    document.getElementById("spinner-container").style.display = "block";
-    document.getElementById("result").style.display = "none";
-    document.getElementById("probability").style.display = "none";
-    document.querySelector("input[type=submit]").disabled = true;
-
-    setTimeout(() => {
-      // output probability of success
-
-      const probabilityElement = document.getElementById("probability");
-      probabilityElement.textContent = `distribution of rolls is ${distribution.toString()} and the probability success is ${rollProbability}%`;
-
-      document.getElementById("spinner-container").style.display = "none";
-      document.getElementById("probability").style.display = "block";
-      document.querySelector("input[type=submit]").disabled = false;
-      document
-        .getElementById("probability")
-        .scrollIntoView({ behavior: "smooth" });
-    }, 500);
+  // defer to odds handler if the odds button was clicked
+  switch (event.submitter.id) {
+    case "submit-button":
+      rollAgainstSelectedHandler();
+      break;
+    case "odds-button":
+      showOddsHandler();
+      break;
+    default:
+      console.log("no event handler found for submitter");
   }
 }
 
