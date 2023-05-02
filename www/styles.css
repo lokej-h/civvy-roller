@@ -1,5 +1,9 @@
 /* styles.css */
 
+div {
+  margin: 1rem;
+}
+
 /* Target the character sheet and result div */
 #character-sheet,
 #result {
@@ -41,11 +45,6 @@ input[type="checkbox"] {
   font-style: italic;
 }
 
-button:disabled {
-    opacity: 0.33;
-    pointer-events: none;
-}
-
 #spinner {
     border: 16px solid #f3f3f3;
     border-top: 16px solid #3498db;
@@ -69,30 +68,30 @@ button:disabled {
     display: none;
 }
 
-#submit-button {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
-}
-
-#odds-button {
+.action-button {
   position: fixed;
-  bottom: 80px;
   right: 20px;
   padding: 10px 20px;
-  background-color: #a16100;
   color: #fff;
   border: none;
   border-radius: 5px;
   font-size: 16px;
   cursor: pointer;
+}
+
+.action-button:disabled {
+    opacity: 0.33;
+    pointer-events: none;
+}
+
+#submit-button {
+    bottom: 20px;
+    background-color: #007bff;
+}
+
+#odds-button {
+  bottom: 80px;
+  background-color: #a16100;
 }
 
 #probability {

@@ -8,65 +8,23 @@
 function generateSkillsHTML(attributes) {
   let html = "";
 
-  if (attributes.attributes && attributes.attributes.length > 0) {
-    // Add attributes section heading and checkbox
-    html += `<h2>Attributes</h2>`;
+  html += attributes.attributes.makeHTML();
 
-    // Add attributes with checkbox to each attribute
-    for (const attribute of attributes.attributes) {
-      html += `<div class="attribute">
-                  <label>
-                    <input type="checkbox" name="${attribute.name}1" id="${attribute.name}" value="${attribute.value}">
-                    <input type="checkbox" name="${attribute.name}2" id="${attribute.name}" value="${attribute.value}">
-                    ${attribute.name}:
-                  </label>
-                  <input type="number" name="${attribute.name}_value" id="${attribute.name}_value" value="${attribute.value}">
-                  <span class="description">${attribute.description}</span>
-               </div>`;
-    }
-  }
+  html += attributes.skills.makeHTML();
 
-  if (attributes.skills && attributes.skills.length > 0) {
-    // Add skills section heading and checkbox
-    html += `<h2>Skills</h2>`;
-
-    // Group skills by category
-    const groupedSkills = {};
-    for (const skill of attributes.skills) {
-      if (!groupedSkills[skill.category]) {
-        groupedSkills[skill.category] = [];
-      }
-      groupedSkills[skill.category].push(skill);
-    }
-    // console.log(groupedSkills)
-
-    // Add skills with checkbox to each skill
-    for (const category in groupedSkills) {
-      html += `<h3>${category}</h3>`;
-      for (const skill of groupedSkills[category]) {
-        html += `<div class="skill">
-                    <label>
-                      <input type="checkbox" name="${skill.name}1" id="${skill.name}" value="${skill.value}">
-                      <input type="checkbox" name="${skill.name}2" id="${skill.name}" value="${skill.value}">
-                      ${skill.name}
-                    </label>
-                    <input type="number" name="${skill.name}_value" id="${skill.name}_value" value="${skill.value}">
-                    <span class="description">${skill.description}</span>
-                 </div>`;
-      }
-    }
-  }
+  html += attributes.vehicles.makeHTML();
 
   html +=
-    '<label for="advantage">Enter the advantage/disadvantage to the roll: </label>';
+    `<h2>Advantage</h2>
+    <label for="advantage">Enter the advantage/disadvantage to the roll: </label>`;
   html +=
     '<input type="number" id="advantage" name="advantage" min="-5" max="5" step="1" value="0"></input>';
 
   // Add submit button
-  html += '<input type="submit" id="submit-button" value="Submit">';
+  html += '<input class="action-button" type="submit" id="submit-button" value="Submit">';
 
   // Add odds button
-  html += '<input type="submit" id="odds-button" value="Show me the Odds">';
+  html += '<input class="action-button" type="submit" id="odds-button" value="Show me the Odds">';
 
   return html;
 }
@@ -141,9 +99,14 @@ function parseCSV(csv) {
 
     return cells;
   });
-  const attributes = [];
-  const skills = [];
+  // const attributes = [];
+  // const skills = [];
   // const vehicleStats = [][];
+
+  // create collections
+  const attributes = new AttributeCollection();
+  const skills = new SkillCollection();
+  const vehicles = new VehicleCollection();
 
   // Find abilities column
   // we know it is in the first row
@@ -186,13 +149,14 @@ function parseCSV(csv) {
   const vehicleStatRow = lines.findIndex((row) => row[0] === "Base Stats") + 1;
 
   // Parse attributes section
-  for (let i = 3; i < skillStartIndex - 1; i += 2) {
+  for (let i = 3; i < skillStartIndex - 2; i += 2) {
     const attribute = {
       name: lines[i][attributeColumnOffset],
       description: lines[i + 1][attributeColumnOffset],
       value: lines[i + 1][attributeColumnOffset + 1],
     };
-    if (attribute.name !== "") attributes.push(attribute);
+    attributes.add(new Attribute(attribute.name, attribute.value, attribute.description))
+    // if (attribute.name !== "") attributes.push(attribute);
   }
 
   // Parse skills section
@@ -207,7 +171,8 @@ function parseCSV(csv) {
           description: lines[row + 1][column + 1],
           value: lines[row + 1][column],
         };
-        skills.push(skill);
+        skills.add(new Skill(skill.name, skill.value, skill.description, skill.category))
+        // skills.push(skill);
         row++;
         row++;
       }
@@ -215,7 +180,7 @@ function parseCSV(csv) {
   }
 
   // Parse vehicle section
-  const vehicles = [];
+  // const vehicles = [];
   for (
     let vehicleColumn = vehicleColumnsStart;
     vehicleColumn < vehicleList.length;
@@ -225,8 +190,10 @@ function parseCSV(csv) {
     // start with the first stat
     let statRow = vehicleStatRow;
     const currentVehicle = lines[vehicleRowHeader][vehicleColumn];
+
     const vehicle = {};
     vehicle.attributes = [];
+
     // we parse only the base stats
     while (cellIsOnlyNumber(lines[statRow][vehicleColumn])) {
       // add vehicle attribute to object
@@ -244,7 +211,13 @@ function parseCSV(csv) {
       vehicle.specialDescription = lines[statRow][vehicleColumn];
     }
     vehicle.name = currentVehicle;
-    vehicles.push(vehicle);
+
+    const vehicleClass = new Vehicle(vehicle.name, vehicle.specialDescription)
+    for (const attribute of vehicle.attributes) {
+      vehicleClass.add(new VehicleStat(attribute.name, attribute.value, attribute.description))
+    }
+    vehicles.add(vehicleClass);
+    // vehicles.push(vehicle);
   }
 
   return { attributes, skills, vehicles };
@@ -443,7 +416,9 @@ function startSpinner() {
   document.getElementById("result").style.display = "none";
   document.getElementById("probability").style.display = "none";
   // disable buttons
-  document.querySelector("input[type=submit]").disabled = true;
+  for (const element in document.getElementsByClassName("action-button")) {
+    element.disabled = true
+  }
 }
 
 function stopSpinner() {
@@ -484,8 +459,8 @@ function onSubmit(event) {
  * @param csv - a string containing comma-separated values (CSV) representing skills data.
  */
 function loadCSV(csv) {
-  const skills = parseCSV(csv);
-  const skillsHTML = generateSkillsHTML(skills);
+  const properties = parseCSV(csv);
+  const skillsHTML = generateSkillsHTML(properties);
 
   // Add skills to DOM
   document.querySelector("#skills").innerHTML = skillsHTML;
@@ -495,4 +470,16 @@ function loadCSV(csv) {
     event.preventDefault();
     onSubmit(event);
   });
+
+  // add vehicle event listener
+  const vehicleDropdown = document.getElementById("vehicle-select");
+  vehicleDropdown.addEventListener('change', () => {
+    const selectedVehicle = vehicleDropdown.value;
+    const vehicle = properties.vehicles.getVehicle(selectedVehicle);
+    if (vehicle === undefined) {
+      document.getElementById("vehicle-property-container").innerHTML = ""
+    } else {
+      document.getElementById("vehicle-property-container").innerHTML = vehicle.makeHTML()
+    }
+  })
 }
