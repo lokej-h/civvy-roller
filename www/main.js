@@ -463,35 +463,32 @@ function rollAgainstSelectedHandler() {
     const resultElement = document.getElementById("result");
 
     // clear the div
-    resultElement.innerHTML = ""
+    resultElement.innerHTML = "";
 
     if (rollComment !== "") {
       // add the comment on the top line
-      const comment = document.createElement('p');
+      const comment = document.createElement("p");
       comment.textContent = rollComment;
       resultElement.appendChild(comment);
     }
 
     // create a line for the roll
-    const roll = document.createElement('p');
+    const roll = document.createElement("p");
 
     // based on the roll, give different styles and text
     if (totalSelectedAdvantage > totalRoll) {
       resultElement.style.color = "green";
-      roll.textContent =
-        `${totalSelectedAdvantage - totalRoll} Successes! 
+      roll.textContent = `${totalSelectedAdvantage - totalRoll} Successes! 
         Rolled: ${totalRoll} 
         against your stats: ${totalSelectedAdvantage}`;
     } else if (totalSelectedAdvantage === totalRoll) {
       resultElement.style.color = "green";
-      roll.textContent =
-        `Match! 
+      roll.textContent = `Match! 
         Rolled: ${totalRoll} 
         against your stats: ${totalSelectedAdvantage}`;
     } else {
       resultElement.style.color = "red";
-      roll.textContent =
-        `${totalRoll - totalSelectedAdvantage} Failures... 
+      roll.textContent = `${totalRoll - totalSelectedAdvantage} Failures... 
           Rolled: ${totalRoll} 
           against your stats: ${totalSelectedAdvantage}`;
     }
