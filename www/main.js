@@ -225,7 +225,7 @@ function parseCSV(csv) {
     // start with the first stat
     let statRow = vehicleStatRow;
     const currentVehicle = lines[vehicleRowHeader][vehicleColumn];
-    const vehicle = new Object();
+    const vehicle = {};
     vehicle.attributes = [];
     // we parse only the base stats
     while (cellIsOnlyNumber(lines[statRow][vehicleColumn])) {
@@ -248,26 +248,6 @@ function parseCSV(csv) {
   }
 
   return { attributes, skills, vehicles };
-}
-
-/**
- * The function reads a CSV file using XMLHttpRequest and passes the data to a callback function.
- * @param file - The file parameter is a string that represents the path to the CSV file that needs to
- * be read.
- * @param callback - The callback parameter is a function that will be called once the CSV file has
- * been successfully retrieved by the XMLHttpRequest. The function will be passed the CSV data as an
- * argument.
- */
-function readCSV(file, callback) {
-  const xhr = new XMLHttpRequest();
-  xhr.open("GET", file);
-  xhr.onreadystatechange = function () {
-    if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-      const csv = xhr.responseText;
-      callback(csv);
-    }
-  };
-  xhr.send();
 }
 
 /**
