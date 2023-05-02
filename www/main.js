@@ -153,7 +153,6 @@ function parseCSV(csv) {
   if (attributeColumnOffset === -1) {
     throw new Error("Unable to find attributes section");
   }
-  console.log(attributeColumnOffset);
 
   // Find start of skills section
   const skillStartIndex = lines.findIndex((row) => row[0].includes("Skills"));
