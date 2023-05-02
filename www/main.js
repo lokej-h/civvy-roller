@@ -1,36 +1,4 @@
 /**
- * The function generates HTML code for a form that includes attributes and skills with checkboxes and
- * input fields, as well as an advantage/disadvantage input and submit buttons.
- * @param {characterObject} attributes - An object containing two properties: "attributes" and "skills".
- * @returns an HTML string that includes checkboxes and input fields for attributes and skills, as well
- * as a label and input field for advantage/disadvantage and submit/odds buttons.
- */
-function generateSkillsHTML(attributes) {
-  let html = "";
-
-  html += attributes.attributes.makeHTML();
-
-  html += attributes.skills.makeHTML();
-
-  html += attributes.vehicles.makeHTML();
-
-  html += `<h2>Advantage</h2>
-    <label for="advantage">Enter the advantage/disadvantage to the roll: </label>`;
-  html +=
-    '<input type="number" id="advantage" name="advantage" min="-5" max="5" step="1" value="0"></input>';
-
-  // Add submit button
-  html +=
-    '<input class="action-button" type="submit" id="submit-button" value="Submit">';
-
-  // Add odds button
-  html +=
-    '<input class="action-button" type="submit" id="odds-button" value="Show me the Odds">';
-
-  return html;
-}
-
-/**
  * This function handles a file input by reading a CSV file and loading its contents.
  */
 function handleFile() {
@@ -42,6 +10,38 @@ function handleFile() {
     const csv = reader.result;
     loadCSV(csv);
   };
+}
+
+/**
+ * The function loads a CSV file, parses it, generates HTML from the parsed data, adds the HTML to the
+ * DOM, and adds an event listener to the skills form.
+ * @param csv - a string containing comma-separated values (CSV) representing skills data.
+ */
+function loadCSV(csv) {
+  const properties = parseCSV(csv);
+  const skillsHTML = generateSkillsHTML(properties);
+
+  // Add skills to DOM
+  document.querySelector("#skills").innerHTML = skillsHTML;
+
+  // add event listener
+  document.getElementById("skills").addEventListener("submit", (event) => {
+    event.preventDefault();
+    onSubmit(event);
+  });
+
+  // add vehicle event listener
+  const vehicleDropdown = document.getElementById("vehicle-select");
+  vehicleDropdown.addEventListener("change", () => {
+    const selectedVehicle = vehicleDropdown.value;
+    const vehicle = properties.vehicles.getVehicle(selectedVehicle);
+    if (vehicle === undefined) {
+      document.getElementById("vehicle-property-container").innerHTML = "";
+    } else {
+      document.getElementById("vehicle-property-container").innerHTML =
+        vehicle.makeHTML();
+    }
+  });
 }
 
 /**
@@ -100,134 +100,317 @@ function parseCSV(csv) {
 
     return cells;
   });
-  // const attributes = [];
-  // const skills = [];
-  // const vehicleStats = [][];
 
   // create collections
   const attributes = new AttributeCollection();
   const skills = new SkillCollection();
   const vehicles = new VehicleCollection();
 
-  // Find abilities column
-  // we know it is in the first row
-  const attributeColumnOffset = lines[0].findIndex((cell) =>
-    cell.includes("Attributes")
-  );
-  if (attributeColumnOffset === -1) {
-    throw new Error("Unable to find attributes section");
-  }
+  // Get attribute section metadata
+  const attributeColumnOffset = getAbilityMetadata();
 
-  // Find start of skills section
-  const skillStartIndex = lines.findIndex((row) => row[0].includes("Skills"));
-  if (skillStartIndex === -1) {
-    throw new Error("Unable to find start of skills section");
-  }
+  // Get skill section metadata
+  const { skillStartIndex, skillCategories } = getSkillMetadata();
 
-  // Get skill categories
-  const skillCategories = lines[skillStartIndex + 1];
-
-  // Find start of vehicle section
-  const vehicleRowHeader = lines.findIndex((row) =>
-    row[0].includes("Consumable Stats")
-  );
-  if (skillStartIndex === -1) {
-    throw new Error("Unable to find start of vehicle section");
-  }
-  // using the first vehicle attribute, find which cell (column) only contains digits
-  // we +1 the row to get into vehicle attributes
-  const vehicleColumnsStart = lines[vehicleRowHeader + 1].findIndex((cell) =>
-    cellIsOnlyNumber(cell)
-  );
-
-  // Get vehicles by slicing the array
-  const vehicleList = lines[vehicleRowHeader].slice(vehicleColumnsStart);
-
-  // Get vehicle stats start
-  // We have the consumable stats above (idk if we even want to show at this stage since we are
-  // mostly concerned about rolls only) so now we need the roll-able stats
-  // +1 to start at the first stat rather than the header
-  const vehicleStatRow = lines.findIndex((row) => row[0] === "Base Stats") + 1;
+  // Get vehicle section metadata
+  const { vehicleColumnsStart, vehicleList, vehicleStatRow, vehicleRowHeader } =
+    getVehicleMetadata();
 
   // Parse attributes section
-  for (let i = 3; i < skillStartIndex - 2; i += 2) {
-    const attribute = {
-      name: lines[i][attributeColumnOffset],
-      description: lines[i + 1][attributeColumnOffset],
-      value: lines[i + 1][attributeColumnOffset + 1],
-    };
-    attributes.add(
-      new Attribute(attribute.name, attribute.value, attribute.description)
-    );
-    // if (attribute.name !== "") attributes.push(attribute);
-  }
+  parseAttributes();
 
   // Parse skills section
-  for (let column = 0; column < skillCategories.length; column++) {
-    let row = skillStartIndex + 3;
-    const category = skillCategories[column];
-    if (category !== "") {
-      while (lines[row][column] !== "") {
-        const skill = {
-          name: lines[row][column],
-          category,
-          description: lines[row + 1][column + 1],
-          value: lines[row + 1][column],
-        };
-        skills.add(
-          new Skill(skill.name, skill.value, skill.description, skill.category)
-        );
-        // skills.push(skill);
-        row++;
-        row++;
+  parseSkills();
+
+  // Parse vehicle section
+  parseVehicles();
+
+  return { attributes, skills, vehicles };
+
+  /**
+   * This function finds the offset of the abilities column in a table.
+   * @returns the index of the column that contains the "Attributes" section in the first row of a table.
+   */
+  function getAbilityMetadata() {
+    // Find abilities column
+    // we know it is in the first row
+    const attributeColumnOffset = lines[0].findIndex((cell) =>
+      cell.includes("Attributes")
+    );
+    if (attributeColumnOffset === -1) {
+      throw new Error("Unable to find attributes section");
+    }
+    return attributeColumnOffset;
+  }
+
+  /**
+   * The function finds the start of the skills section in an array of lines and returns the index and
+   * categories of the skills.
+   * @returns An object with two properties: `skillStartIndex` and `skillCategories`.
+   */
+  function getSkillMetadata() {
+    // Find start of skills section
+    const skillStartIndex = lines.findIndex((row) => row[0].includes("Skills"));
+    if (skillStartIndex === -1) {
+      throw new Error("Unable to find start of skills section");
+    }
+
+    // Get skill categories
+    const skillCategories = lines[skillStartIndex + 1];
+    return { skillStartIndex, skillCategories };
+  }
+
+  /**
+   * This function retrieves metadata about a vehicle section in an array of lines.
+   * @returns An object containing the following properties: vehicleColumnsStart, vehicleList,
+   * vehicleStatRow, and vehicleRowHeader.
+   */
+  function getVehicleMetadata() {
+    // Find start of vehicle section
+    const vehicleRowHeader = lines.findIndex((row) =>
+      row[0].includes("Consumable Stats")
+    );
+    if (vehicleRowHeader === -1) {
+      throw new Error("Unable to find start of vehicle section");
+    }
+    // using the first vehicle attribute, find which cell (column) only contains digits
+    // we +1 the row to get into vehicle attributes
+    const vehicleColumnsStart = lines[vehicleRowHeader + 1].findIndex((cell) =>
+      cellIsOnlyNumber(cell)
+    );
+
+    // Get vehicles by slicing the array
+    const vehicleList = lines[vehicleRowHeader].slice(vehicleColumnsStart);
+
+    // Get vehicle stats start
+    // We have the consumable stats above (idk if we even want to show at this stage since we are
+    // mostly concerned about rolls only) so now we need the roll-able stats
+    // +1 to start at the first stat rather than the header
+    const vehicleStatRow =
+      lines.findIndex((row) => row[0] === "Base Stats") + 1;
+    return {
+      vehicleColumnsStart,
+      vehicleList,
+      vehicleStatRow,
+      vehicleRowHeader,
+    };
+  }
+
+  /**
+   * The function parses attributes from lines and adds them to an attribute object.
+   */
+  function parseAttributes() {
+    for (let i = 3; i < skillStartIndex - 2; i += 2) {
+      const attribute = {
+        name: lines[i][attributeColumnOffset],
+        description: lines[i + 1][attributeColumnOffset],
+        value: lines[i + 1][attributeColumnOffset + 1],
+      };
+      attributes.add(
+        new Attribute(attribute.name, attribute.value, attribute.description)
+      );
+      // if (attribute.name !== "") attributes.push(attribute);
+    }
+  }
+
+  /**
+   * The function parses skills from lines and adds them to a set of Skill objects.
+   */
+  function parseSkills() {
+    for (let column = 0; column < skillCategories.length; column++) {
+      let row = skillStartIndex + 3;
+      const category = skillCategories[column];
+      if (category !== "") {
+        while (lines[row][column] !== "") {
+          const skill = {
+            name: lines[row][column],
+            category,
+            description: lines[row + 1][column + 1],
+            value: lines[row + 1][column],
+          };
+          skills.add(
+            new Skill(
+              skill.name,
+              skill.value,
+              skill.description,
+              skill.category
+            )
+          );
+          // skills.push(skill);
+          row++;
+          row++;
+        }
       }
     }
   }
 
-  // Parse vehicle section
-  // const vehicles = [];
-  for (
-    let vehicleColumn = vehicleColumnsStart;
-    vehicleColumn < vehicleList.length;
-    vehicleColumn++
-  ) {
-    // Parsing vehicle by vehicle...
-    // start with the first stat
-    let statRow = vehicleStatRow;
-    const currentVehicle = lines[vehicleRowHeader][vehicleColumn];
+  /**
+   * This function parses vehicle data from lines and creates Vehicle objects with their
+   * respective attributes.
+   */
+  function parseVehicles() {
+    // const vehicles = [];
+    for (
+      let vehicleColumn = vehicleColumnsStart;
+      vehicleColumn < vehicleList.length;
+      vehicleColumn++
+    ) {
+      // Parsing vehicle by vehicle...
+      // start with the first stat
+      let statRow = vehicleStatRow;
+      const currentVehicle = lines[vehicleRowHeader][vehicleColumn];
 
-    const vehicle = {};
-    vehicle.attributes = [];
+      const vehicle = {};
+      vehicle.attributes = [];
 
-    // we parse only the base stats
-    while (cellIsOnlyNumber(lines[statRow][vehicleColumn])) {
-      // add vehicle attribute to object
-      vehicle.attributes.push({
-        name: lines[statRow][0],
-        value: lines[statRow][vehicleColumn],
-        // description is under the attribute name, so + 1 to row
-        description: lines[statRow + 1][0],
-      });
-      statRow++;
-      statRow++;
-    }
-    // possibly a special descriptor cell that is in the position of a attribute value
-    if (lines[statRow][vehicleColumn] !== "") {
-      vehicle.specialDescription = lines[statRow][vehicleColumn];
-    }
-    vehicle.name = currentVehicle;
+      // we parse only the base stats
+      while (cellIsOnlyNumber(lines[statRow][vehicleColumn])) {
+        // add vehicle attribute to object
+        vehicle.attributes.push({
+          name: lines[statRow][0],
+          value: lines[statRow][vehicleColumn],
+          // description is under the attribute name, so + 1 to row
+          description: lines[statRow + 1][0],
+        });
+        statRow++;
+        statRow++;
+      }
+      // possibly a special descriptor cell that is in the position of a attribute value
+      if (lines[statRow][vehicleColumn] !== "") {
+        vehicle.specialDescription = lines[statRow][vehicleColumn];
+      }
+      vehicle.name = currentVehicle;
 
-    const vehicleClass = new Vehicle(vehicle.name, vehicle.specialDescription);
-    for (const attribute of vehicle.attributes) {
-      vehicleClass.add(
-        new VehicleStat(attribute.name, attribute.value, attribute.description)
+      const vehicleClass = new Vehicle(
+        vehicle.name,
+        vehicle.specialDescription
       );
+      for (const attribute of vehicle.attributes) {
+        vehicleClass.add(
+          new VehicleStat(
+            attribute.name,
+            attribute.value,
+            attribute.description
+          )
+        );
+      }
+      vehicles.add(vehicleClass);
+      // vehicles.push(vehicle);
     }
-    vehicles.add(vehicleClass);
-    // vehicles.push(vehicle);
+  }
+}
+
+/**
+ * The function generates HTML code for a form that includes attributes and skills with checkboxes and
+ * input fields, as well as an advantage/disadvantage input and submit buttons.
+ * @param {characterObject} attributes - An object containing two properties: "attributes" and "skills".
+ * @returns an HTML string that includes checkboxes and input fields for attributes and skills, as well
+ * as a label and input field for advantage/disadvantage and submit/odds buttons.
+ */
+function generateSkillsHTML(attributes) {
+  let html = "";
+
+  html += attributes.attributes.makeHTML();
+
+  html += attributes.skills.makeHTML();
+
+  html += attributes.vehicles.makeHTML();
+
+  html += `<h2>Advantage</h2>
+    <label for="advantage">Enter the advantage/disadvantage to the roll: </label>`;
+  html +=
+    '<input type="number" id="advantage" name="advantage" min="-5" max="5" step="1" value="0"></input>';
+
+  // Add submit button
+  html +=
+    '<input class="action-button" type="submit" id="submit-button" value="Submit">';
+
+  // Add odds button
+  html +=
+    '<input class="action-button" type="submit" id="odds-button" value="Show me the Odds">';
+
+  return html;
+}
+
+/**
+ * The function handles form submission events and delegates to different handlers based on which
+ * button was clicked.
+ * @param event - The event parameter is an object that represents an event that occurred in the
+ * browser, such as a button click or form submission.
+ */
+function onSubmit(event) {
+  event.preventDefault();
+
+  // defer to odds handler if the odds button was clicked
+  switch (event.submitter.id) {
+    case "submit-button":
+      rollAgainstSelectedHandler();
+      break;
+    case "odds-button":
+      showOddsHandler();
+      break;
+    default:
+      console.log("no event handler found for submitter");
+  }
+}
+
+/**
+ * The function extracts selected attributes and skills, calculates the total roll with advantage, and
+ * returns the number of rolls and the total roll value.
+ * @returns an object with two properties: "numRolls" and "totalSelectedAdvantage".
+ */
+function extractSelected() {
+  // Get selected attributes and skills
+  const selected = [];
+  const checkboxes = document.querySelectorAll(
+    'input[type="checkbox"]:checked'
+  );
+  for (const checkbox of checkboxes) {
+    selected.push(
+      document.getElementById(checkbox.id + "_value").valueAsNumber
+    );
   }
 
-  return { attributes, skills, vehicles };
+  const advantageData = document.getElementById("advantage");
+  const advantageValue = Number(advantageData.value);
+  const numRolls = selected.length;
+
+  // Generate random numbers and sum
+  // Get user input for total roll
+  const totalSelected = selected.reduce((prev, curr) => prev + curr, 0);
+  const totalSelectedAdvantage = totalSelected + advantageValue;
+  return { numRolls, totalSelectedAdvantage };
+}
+
+/**
+ * The function starts a spinner and disables certain buttons while hiding certain divs.
+ */
+function startSpinner() {
+  document.getElementById("spinner-container").style.display = "block";
+  // hide divs
+  document.getElementById("result").style.display = "none";
+  document.getElementById("probability").style.display = "none";
+  // disable buttons
+  for (const element in document.getElementsByClassName("action-button")) {
+    element.disabled = true;
+  }
+}
+
+/**
+ * The function stops a spinner animation and enables a submit button.
+ */
+function stopSpinner() {
+  document.getElementById("spinner-container").style.display = "none";
+  document.querySelector("input[type=submit]").disabled = false;
+}
+
+/**
+ * This function shows an HTML element with a specified ID and scrolls to it smoothly.
+ * @param id - The ID of the HTML element that you want to show and scroll to.
+ */
+function showAndScrollToID(id) {
+  document.getElementById(id).style.display = "block";
+  document.getElementById(id).scrollIntoView({ behavior: "smooth" });
 }
 
 /**
@@ -246,6 +429,79 @@ function calculateRoll(n) {
     sum += (window.crypto.getRandomValues(new Uint8Array(1))[0] % 6) + 1;
   }
   return sum;
+}
+
+/**
+ * The function rolls a dice and compares the result to selected attributes and skills, displaying the
+ * outcome in the UI.
+ * @returns The function `rollAgainstSelectedHandler` does not explicitly return anything, but it may
+ * return `undefined` implicitly if the `numRolls` variable is equal to 0.
+ */
+function rollAgainstSelectedHandler() {
+  // Get selected attributes and skills
+  const { numRolls, totalSelectedAdvantage } = extractSelected();
+
+  // early return
+  if (numRolls === 0) {
+    return;
+  }
+
+  const totalRoll = calculateRoll(numRolls);
+  let rollComment = "";
+
+  if (totalRoll === numRolls) {
+    rollComment = `SNAKE EYES! Mark your attribute for level up  `;
+  }
+  if (totalRoll === numRolls * 6) {
+    rollComment = `Crit Fail! Add a Tomino Token because you're gonna have a bad time...`;
+  }
+
+  // do a little spinny for the UI
+  startSpinner();
+
+  setTimeout(() => {
+    const resultElement = document.getElementById("result");
+
+    // clear the div
+    resultElement.innerHTML = ""
+
+    if (rollComment !== "") {
+      // add the comment on the top line
+      const comment = document.createElement('p');
+      comment.textContent = rollComment;
+      resultElement.appendChild(comment);
+    }
+
+    // create a line for the roll
+    const roll = document.createElement('p');
+
+    // based on the roll, give different styles and text
+    if (totalSelectedAdvantage > totalRoll) {
+      resultElement.style.color = "green";
+      roll.textContent =
+        `${totalSelectedAdvantage - totalRoll} Successes! 
+        Rolled: ${totalRoll} 
+        against your stats: ${totalSelectedAdvantage}`;
+    } else if (totalSelectedAdvantage === totalRoll) {
+      resultElement.style.color = "green";
+      roll.textContent =
+        `Match! 
+        Rolled: ${totalRoll} 
+        against your stats: ${totalSelectedAdvantage}`;
+    } else {
+      resultElement.style.color = "red";
+      roll.textContent =
+        `${totalRoll - totalSelectedAdvantage} Failures... 
+          Rolled: ${totalRoll} 
+          against your stats: ${totalSelectedAdvantage}`;
+    }
+
+    // add line to the div
+    resultElement.appendChild(roll);
+
+    stopSpinner();
+    showAndScrollToID("result");
+  }, 500);
 }
 
 /**
@@ -339,155 +595,4 @@ function showOddsHandler() {
     // show and scroll to section
     showAndScrollToID("probability");
   }, 500);
-}
-
-function rollAgainstSelectedHandler() {
-  // Get selected attributes and skills
-  const { numRolls, totalSelectedAdvantage } = extractSelected();
-
-  // early return
-  if (numRolls === 0) {
-    return;
-  }
-
-  const totalRoll = calculateRoll(numRolls);
-  let snakeEyesComment = "";
-
-  if (totalRoll === numRolls) {
-    snakeEyesComment = `SNAKE EYES! Mark your attribute for level up  `;
-  }
-  if (totalRoll === numRolls * 6) {
-    snakeEyesComment = `Crit Fail! Add a Tomino Token because you're gonna have a bad time...`;
-  }
-
-  // do a little spinny for the UI
-  startSpinner();
-
-  setTimeout(() => {
-    // Compare selected total to user input total
-    const resultElement = document.getElementById("result");
-    if (totalSelectedAdvantage > totalRoll) {
-      resultElement.style.color = "green";
-      resultElement.textContent =
-        snakeEyesComment +
-        `${totalSelectedAdvantage - totalRoll} Successes! 
-        Rolled: ${totalRoll} 
-        against your stats: ${totalSelectedAdvantage}`;
-    } else if (totalSelectedAdvantage === totalRoll) {
-      resultElement.style.color = "green";
-      resultElement.textContent =
-        snakeEyesComment +
-        `Match! 
-        Rolled: ${totalRoll} 
-        against your stats: ${totalSelectedAdvantage}`;
-    } else {
-      resultElement.style.color = "red";
-      resultElement.textContent =
-        snakeEyesComment +
-        `${totalRoll - totalSelectedAdvantage} Failures... 
-          Rolled: ${totalRoll} 
-          against your stats: ${totalSelectedAdvantage}`;
-    }
-
-    stopSpinner();
-    showAndScrollToID("result");
-  }, 500);
-}
-
-function extractSelected() {
-  // Get selected attributes and skills
-  const selected = [];
-  const checkboxes = document.querySelectorAll(
-    'input[type="checkbox"]:checked'
-  );
-  for (const checkbox of checkboxes) {
-    selected.push(
-      document.getElementById(checkbox.id + "_value").valueAsNumber
-    );
-  }
-
-  const advantageData = document.getElementById("advantage");
-  const advantageValue = Number(advantageData.value);
-  const numRolls = selected.length;
-
-  // Generate random numbers and sum
-  // Get user input for total roll
-  const totalSelected = selected.reduce((prev, curr) => prev + curr, 0);
-  const totalSelectedAdvantage = totalSelected + advantageValue;
-  return { numRolls, totalSelectedAdvantage };
-}
-
-function startSpinner() {
-  document.getElementById("spinner-container").style.display = "block";
-  // hide divs
-  document.getElementById("result").style.display = "none";
-  document.getElementById("probability").style.display = "none";
-  // disable buttons
-  for (const element in document.getElementsByClassName("action-button")) {
-    element.disabled = true;
-  }
-}
-
-function stopSpinner() {
-  document.getElementById("spinner-container").style.display = "none";
-  document.querySelector("input[type=submit]").disabled = false;
-}
-
-function showAndScrollToID(id) {
-  document.getElementById(id).style.display = "block";
-  document.getElementById(id).scrollIntoView({ behavior: "smooth" });
-}
-
-/**
- * The function handles form submission events and delegates to different handlers based on which
- * button was clicked.
- * @param event - The event parameter is an object that represents an event that occurred in the
- * browser, such as a button click or form submission.
- */
-function onSubmit(event) {
-  event.preventDefault();
-
-  // defer to odds handler if the odds button was clicked
-  switch (event.submitter.id) {
-    case "submit-button":
-      rollAgainstSelectedHandler();
-      break;
-    case "odds-button":
-      showOddsHandler();
-      break;
-    default:
-      console.log("no event handler found for submitter");
-  }
-}
-
-/**
- * The function loads a CSV file, parses it, generates HTML from the parsed data, adds the HTML to the
- * DOM, and adds an event listener to the skills form.
- * @param csv - a string containing comma-separated values (CSV) representing skills data.
- */
-function loadCSV(csv) {
-  const properties = parseCSV(csv);
-  const skillsHTML = generateSkillsHTML(properties);
-
-  // Add skills to DOM
-  document.querySelector("#skills").innerHTML = skillsHTML;
-
-  // add event listener
-  document.getElementById("skills").addEventListener("submit", (event) => {
-    event.preventDefault();
-    onSubmit(event);
-  });
-
-  // add vehicle event listener
-  const vehicleDropdown = document.getElementById("vehicle-select");
-  vehicleDropdown.addEventListener("change", () => {
-    const selectedVehicle = vehicleDropdown.value;
-    const vehicle = properties.vehicles.getVehicle(selectedVehicle);
-    if (vehicle === undefined) {
-      document.getElementById("vehicle-property-container").innerHTML = "";
-    } else {
-      document.getElementById("vehicle-property-container").innerHTML =
-        vehicle.makeHTML();
-    }
-  });
 }
