@@ -32,8 +32,8 @@ jobs:
         with:
           auto_fix: true
           eslint: true
-          eslint_extensions: js
+          eslint_extensions: js,html
           eslint_dir: ./www
           prettier: true
-          prettier_extensions: js
+          prettier_extensions: js,css,html
           prettier_dir: ./www
