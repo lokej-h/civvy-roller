@@ -86,6 +86,22 @@ function handleFile() {
 }
 
 /**
+ * The function checks if a given cell contains only numbers.
+ * @param {str} cell The "cell" parameter is a variable that represents a single cell in a spreadsheet or
+ * table. The function "cellIsOnlyNumber" takes this cell as input and checks if it contains only
+ * numbers (digits).
+ * @returns {bool} The function `cellIsOnlyNumber` is returning a boolean value (`true` or `false`) depending
+ * on whether the input `cell` contains only digits (0-9) or not.
+ */
+function cellIsOnlyNumber(cell) {
+  /**
+   * The regex is ^d+$ which checks for 1 or more digits. If the regex succeeds on cell,
+   * cell only contains digits
+   */
+  return /^\d+$/.test(cell);
+}
+
+/**
  * The function parses a CSV file and extracts attributes and skills data.
  * @param {str} csv - The CSV string that needs to be parsed into an object.
  * @returns {characterObject} An object with two properties: "attributes" and "skills".
@@ -148,6 +164,29 @@ function parseCSV(csv) {
   // Get skill categories
   const skillCategories = lines[skillStartIndex + 1];
 
+  // Find start of vehicle section
+  const vehicleRowHeader = lines.findIndex((row) =>
+    row[0].includes("Consumable Stats")
+  );
+  if (skillStartIndex === -1) {
+    throw new Error("Unable to find start of vehicle section");
+  }
+  // using the first vehicle attribute, find which cell (column) only contains digits
+  // we +1 the row to get into vehicle attributes
+  const vehicleColumnsStart = lines[vehicleRowHeader + 1].findIndex((cell) =>
+    cellIsOnlyNumber(cell)
+  );
+
+  // Get vehicles by slicing the array
+  const vehicleList = lines[vehicleRowHeader].slice(vehicleColumnsStart);
+
+  // Get vehicle stats start
+  // We have the consumable stats above (idk if we even want to show at this stage since we are
+  // mostly concerned about rolls only) so now we need the roll-able stats
+  // +1 to start at the first stat rather than the header
+  const vehicleStatRow =
+    lines.findIndex((row) => row[0] === "Base Stats") + 1;
+
   // Parse attributes section
   for (let i = 3; i < skillStartIndex - 1; i += 2) {
     const attribute = {
@@ -177,7 +216,36 @@ function parseCSV(csv) {
     }
   }
 
-  return { attributes, skills };
+  // Parse vehicle section
+  let vehicles = [];
+  for (let vehicleColumn = vehicleColumnsStart; vehicleColumn < vehicleList.length; vehicleColumn++) {
+    // Parsing vehicle by vehicle...
+    // start with the first stat
+    let statRow = vehicleStatRow;
+    let currentVehicle = lines[vehicleRowHeader][vehicleColumn]
+    let vehicle = new Object();
+    vehicle["attributes"] = [];
+    // we parse only the base stats
+    while (cellIsOnlyNumber(lines[statRow][vehicleColumn])) {
+      // add vehicle attribute to object
+      vehicle["attributes"].push({
+        name: lines[statRow][0],
+        value: lines[statRow][vehicleColumn],
+        // description is under the attribute name, so + 1 to row
+        description: lines[statRow + 1][0],
+      });
+      statRow++;
+      statRow++;
+    }
+    // possibly a special descriptor cell that is in the position of a attribute value
+    if (lines[statRow][vehicleColumn] !== "") {
+      vehicle["specialDescription"] = lines[statRow][vehicleColumn];
+    }
+    vehicle["name"] = currentVehicle;
+    vehicles.push(vehicle);
+  }
+
+  return { attributes, skills, vehicles };
 }
 
 /**
