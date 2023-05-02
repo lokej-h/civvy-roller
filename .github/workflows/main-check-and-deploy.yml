@@ -11,16 +11,17 @@ on:
     branches:
       - main
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
-permissions:
-  contents: write # write to repo the lint changes
-  pages: write # allow deploy to pages
-  id-token: write
-  checks: write # allow linter to make comments on commits
-
 jobs:
   run-linters:
     uses: ./.github/workflows/linters.yml
+    permissions: # Sets permissions of the GITHUB_TOKEN to allow linting and reporting
+      contents: write # write to repo the lint changes
+      checks: write # allow linter to make comments on commits
+
   deploy:
     needs: run-linters
     uses: ./.github/workflows/static.yml
+    permissions: # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+      pages: write # allow deploy to pages
+      id-token: write # allow deploy to pages
+      contents: read
