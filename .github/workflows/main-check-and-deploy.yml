@@ -4,18 +4,19 @@ on:
   # Trigger the workflow on push or pull request,
   # but only for the main branch
   push:
-    branches: 
-     - main
-     - release/*
+    branches:
+      - main
+      - release/*
   pull_request:
     branches:
-     - main
+      - main
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
-  contents: write
-  pages: write
+  contents: write # write to repo the lint changes
+  pages: write # allow deploy to pages
   id-token: write
+  checks: write # allow linter to make comments on commits
 
 jobs:
   run-linters:
