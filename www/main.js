@@ -216,18 +216,18 @@ function parseCSV(csv) {
   }
 
   // Parse vehicle section
-  let vehicles = [];
+  const vehicles = [];
   for (let vehicleColumn = vehicleColumnsStart; vehicleColumn < vehicleList.length; vehicleColumn++) {
     // Parsing vehicle by vehicle...
     // start with the first stat
     let statRow = vehicleStatRow;
-    let currentVehicle = lines[vehicleRowHeader][vehicleColumn]
-    let vehicle = new Object();
-    vehicle["attributes"] = [];
+    const currentVehicle = lines[vehicleRowHeader][vehicleColumn]
+    const vehicle = new Object();
+    vehicle.attributes = [];
     // we parse only the base stats
     while (cellIsOnlyNumber(lines[statRow][vehicleColumn])) {
       // add vehicle attribute to object
-      vehicle["attributes"].push({
+      vehicle.attributes.push({
         name: lines[statRow][0],
         value: lines[statRow][vehicleColumn],
         // description is under the attribute name, so + 1 to row
@@ -238,9 +238,9 @@ function parseCSV(csv) {
     }
     // possibly a special descriptor cell that is in the position of a attribute value
     if (lines[statRow][vehicleColumn] !== "") {
-      vehicle["specialDescription"] = lines[statRow][vehicleColumn];
+      vehicle.specialDescription = lines[statRow][vehicleColumn];
     }
-    vehicle["name"] = currentVehicle;
+    vehicle.name = currentVehicle;
     vehicles.push(vehicle);
   }
 
