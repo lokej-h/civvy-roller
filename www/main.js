@@ -108,9 +108,9 @@ function cellIsOnlyNumber(cell) {
  */
 function parseCSV(csv) {
   /**
-    * bulk of processing, convert the comma delimited csv into "lines"
-    * each line is a row so we can index by row-column format e.g. line[row][column]
-    */
+   * bulk of processing, convert the comma delimited csv into "lines"
+   * each line is a row so we can index by row-column format e.g. line[row][column]
+   */
   const lines = csv.split("\n").map((line) => {
     const cells = [];
     let currentCell = "";
@@ -183,8 +183,7 @@ function parseCSV(csv) {
   // We have the consumable stats above (idk if we even want to show at this stage since we are
   // mostly concerned about rolls only) so now we need the roll-able stats
   // +1 to start at the first stat rather than the header
-  const vehicleStatRow =
-    lines.findIndex((row) => row[0] === "Base Stats") + 1;
+  const vehicleStatRow = lines.findIndex((row) => row[0] === "Base Stats") + 1;
 
   // Parse attributes section
   for (let i = 3; i < skillStartIndex - 1; i += 2) {
@@ -217,11 +216,15 @@ function parseCSV(csv) {
 
   // Parse vehicle section
   const vehicles = [];
-  for (let vehicleColumn = vehicleColumnsStart; vehicleColumn < vehicleList.length; vehicleColumn++) {
+  for (
+    let vehicleColumn = vehicleColumnsStart;
+    vehicleColumn < vehicleList.length;
+    vehicleColumn++
+  ) {
     // Parsing vehicle by vehicle...
     // start with the first stat
     let statRow = vehicleStatRow;
-    const currentVehicle = lines[vehicleRowHeader][vehicleColumn]
+    const currentVehicle = lines[vehicleRowHeader][vehicleColumn];
     const vehicle = new Object();
     vehicle.attributes = [];
     // we parse only the base stats
@@ -470,9 +473,7 @@ function stopSpinner() {
 
 function showAndScrollToID(id) {
   document.getElementById(id).style.display = "block";
-  document
-    .getElementById(id)
-    .scrollIntoView({ behavior: "smooth" });
+  document.getElementById(id).scrollIntoView({ behavior: "smooth" });
 }
 
 /**
