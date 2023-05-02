@@ -7,5 +7,5 @@ You can use the tool [here](https://lokej-h.github.io/civvy-roller/).
 ## TODO
 
 - [X] add advantage (thanks @Mpyatt)
-- [ ] add vehicles
+- [X] add vehicles
 - [X] fix snake eye check (thanks @Mpyatt)
