@@ -22,6 +22,7 @@ class BaseCollection {
     constructor() {
         this.items = [];
     }
+
     add(item) {
         this.items.push(item);
     }
@@ -84,6 +85,7 @@ class Vehicle extends BaseCollection {
         this.name = name;
         this.description = description;
     }
+
     makeHTML() {
         let html = "";
         // make heading
@@ -121,6 +123,7 @@ class VehicleCollection extends BaseCollection {
         html += `</div>`;
         return html;
     }
+
     getVehicle(name) {
         return this.items.find((vehicle) => vehicle.name === name);
     }
