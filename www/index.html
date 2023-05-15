@@ -2,9 +2,6 @@
 <html>
   <head>
     <title>Character Sheet</title>
-    <script src="classes.js"></script>
-    <script src="main.js"></script>
-
     <head>
       <title>Character Sheet</title>
       <link rel="stylesheet" type="text/css" href="styles.css" />
@@ -12,8 +9,14 @@
   </head>
 
   <body>
-    <input type="file" id="file-input" />
-    <button onclick="handleFile()">Upload</button>
+  	<div id="upload-container">
+      <label class="upload-button" for="file-input">Browse</label>
+      <span>
+        <input type="file" id="file-input" />
+        <span  id="file-input-name"></span>
+      </span> 
+      <button class="upload-button" onclick="handleFile()">Upload</button>
+    </div>
     <div id="character-sheet">
       <form id="skills"></form>
     </div>
@@ -22,5 +25,7 @@
     </div>
     <div id="probability"></div>
     <div id="result"></div>
+    <script src="classes.js"></script>
+    <script src="main.js"></script>
   </body>
 </html>

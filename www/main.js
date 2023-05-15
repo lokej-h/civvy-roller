@@ -1,3 +1,16 @@
+// add file event listener to show chosen file name
+document.getElementById("file-input").addEventListener("change", () => {
+  showSelectedFileName();
+});
+
+function showSelectedFileName() {
+  const input = document.getElementById("file-input");
+  const file = input.files[0];
+  document.getElementById("file-input-name").textContent = `${file.name}`;
+}
+
+showSelectedFileName();
+
 /**
  * This function handles a file input by reading a CSV file and loading its contents.
  */
