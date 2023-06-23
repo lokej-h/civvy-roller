@@ -1,6 +1,9 @@
 /* styles.css */
 
 :root {
+  --action-button-margin: .25em;
+  --action-button-height: 1em;
+  --action-button-padding: calc(var(--action-button-height) / 2) .75em;
   font-family: 'Tahoma';
 }
 
@@ -82,6 +85,7 @@ input[type="checkbox"] {
   display: none;
 }
 
+/* .action-button { */
 
 
 .upload-button {
@@ -94,14 +98,26 @@ input[type="checkbox"] {
   margin: 0 1em;
 }
 
+#floating-action-container {
   position: fixed;
-  right: 20px;
-  padding: 10px 20px;
+  right: 2rem;
+  bottom: var(--action-button-margin);
+  display: grid;
+  grid-template-columns: min-content;
+  grid-template-rows: repeat(2, auto);
+  justify-items: end;
+  align-items: center;
+  grid-auto-flow: column;
+}
+
+.action-button {
+  padding: var(--action-button-padding);
   color: #fff;
   border: none;
   border-radius: 5px;
   font-size: 16px;
   cursor: pointer;
+  margin: var(--action-button-margin);
 }
 
 .action-button:disabled {
@@ -110,12 +126,10 @@ input[type="checkbox"] {
 }
 
 #submit-button {
-  bottom: 20px;
   background-color: #007bff;
 }
 
 #odds-button {
-  bottom: 80px;
   background-color: #a16100;
 }
 
