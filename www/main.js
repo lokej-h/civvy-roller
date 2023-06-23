@@ -334,13 +334,19 @@ function generateSkillsHTML(attributes) {
   html +=
     '<input type="number" id="advantage" name="advantage" min="-5" max="5" step="1" value="0"></input>';
 
+  // Make the floating submission div
+  html += '<div class="action-container" id="floating-action-container">'
+
+  // Add odds button
+  html +=
+  '<input class="action-button" type="submit" id="odds-button" value="Show me the Odds">';
+  
   // Add submit button
   html +=
     '<input class="action-button" type="submit" id="submit-button" value="Submit">';
 
-  // Add odds button
-  html +=
-    '<input class="action-button" type="submit" id="odds-button" value="Show me the Odds">';
+  // Close action container
+  html += '</div>'
 
   return html;
 }
