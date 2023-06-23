@@ -1,17 +1,17 @@
 /* styles.css */
 
 :root {
-  --action-button-margin: .25em;
+  --action-button-margin: 0.25em;
   --action-button-height: 1em;
-  --action-button-padding: calc(var(--action-button-height) / 2) .75em;
-  font-family: 'Tahoma';
+  --action-button-padding: calc(var(--action-button-height) / 2) 0.75em;
+  font-family: "Tahoma";
 }
 
 div {
   margin: 1rem;
 }
 
-input[type=file] {
+input[type="file"] {
   opacity: 0;
   position: fixed;
   left: -100vw;
@@ -86,7 +86,6 @@ input[type="checkbox"] {
 }
 
 /* .action-button { */
-
 
 .upload-button {
   padding: var(--action-button-padding);
