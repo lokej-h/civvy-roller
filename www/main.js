@@ -65,6 +65,8 @@ function loadCSV(csv) {
  */
 function csvStrToArray(csv) {
   const totalColumns = csv.split("\n")[0].split(",").length;
+  // add final newline to signal end of final row
+  csv += "\n";
   // 2D array
   const lines = [];
   /**
