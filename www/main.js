@@ -95,11 +95,8 @@ function csvStrToArray(csv) {
     if (!insideQuotes) {
       // check for cell delimiter
       if (char === ",") {
-        // add cell to row, if Windows, there's going to be \r's at the start
-        // of some rows
-        cells.push(currentCell.trimEnd().trimStart());
-        // reset cell data
-        currentCell = "";
+        pushCellData();
+        // console.log("Cell complete: ", cells[-1]);
         continue;
       }
       /**
@@ -107,17 +104,29 @@ function csvStrToArray(csv) {
        * This is always at the end of a line
        */
       if (char === "\n") {
+        pushCellData();
         // add row to 2D array
         lines.push(cells);
         // reset row state
         cells = [];
+        console.log("Row complete: ", lines[-1]);
         continue;
       }
     }
     // not end of cell or end of row, add content to cell
     currentCell += char;
+    // console.log("Cell updated: ", currentCell);
   }
+  console.log(lines);
   return lines;
+
+  function pushCellData() {
+    // add cell to row, if Windows, there's going to be \r's at the start
+    // of some rows
+    cells.push(currentCell.trimEnd());
+    // reset cell data
+    currentCell = "";
+  }
 }
 
 /**
