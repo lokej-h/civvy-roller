@@ -109,7 +109,7 @@ function csvStrToArray(csv) {
         lines.push(cells);
         // reset row state
         cells = [];
-        console.log("Row complete: ", lines[-1]);
+        // console.log("Row complete: ", lines[-1]);
         continue;
       }
     }
@@ -117,7 +117,7 @@ function csvStrToArray(csv) {
     currentCell += char;
     // console.log("Cell updated: ", currentCell);
   }
-  console.log(lines);
+  // console.log(lines);
   return lines;
 
   function pushCellData() {
