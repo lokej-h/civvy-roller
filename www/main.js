@@ -58,6 +58,100 @@ function loadCSV(csv) {
 }
 
 /**
+ * bulk of processing, convert the comma delimited csv into "lines"
+ * each line is a row so we can index by row-column format e.g. line[row][column]
+ * @param {str} csv string csv directly from the uploaded file
+ * @returns {Array<Array<str>>} 2D array version of the csv
+ */
+function csvStrToArray(csv) {
+  const totalColumns = csv.split("\n")[0].split(',').length;
+  // 2D array
+  const lines = [];
+  /**
+   * key point: cells may span multiple lines
+   * therefore lines can be found by two ways:
+   *  1. check for an unterminated quote, this seems to be the only case
+   *      might not be the only case
+   *  2. ensure there are the same number of columns each time
+   *      might now work depending on the standard
+   */
+  /**
+   * This is the solution I have
+   *
+   * State:
+   * - insideQuotes: bool
+   * - cells: str[] (current row)
+   */
+  let cells = [];
+  let currentCell = "";
+  let insideQuotes = false;
+  for (let i = 0; i < csv.length; i++) {
+    // get char
+    let char = csv.charAt(i);
+    console.log(char);
+    if (char === '"') {
+      insideQuotes = !insideQuotes;
+      continue
+    }
+    if (!insideQuotes) {
+      // check for cell delimiter
+      if (char === ',') {
+        // add cell to row, if Windows, there's going to be \r's at the start
+        // of some rows
+        cells.push(currentCell.trimEnd().trimStart());
+        // reset cell data
+        currentCell = "";
+        continue;
+      }
+      /**
+       * If we hit the end of the row
+       * This is always at the end of a line
+       */
+      if (char === '\n') {
+        // add row to 2D array
+        lines.push(cells);
+        // reset row state
+        cells = [];
+        continue;
+      }
+    }
+    // not end of cell or end of row, add content to cell
+    currentCell += char;
+  }
+  return lines;
+    // const lines = csv.split("\n").map((line) => {
+  //   const cells = [];
+  //   let currentCell = "";
+  //   let insideQuotes = false;
+
+  //   for (let i = 0; i < line.length; i++) {
+  //     const char = line.charAt(i);
+
+  //     if (char === "," && !insideQuotes) {
+  //       cells.push(currentCell);
+  //       currentCell = "";
+  //     } else if (
+  //       char === '"' &&
+  //       i < line.length - 1 &&
+  //       line.charAt(i + 1) === '"'
+  //     ) {
+  //       // Handle escaped quotes
+  //       currentCell += '"';
+  //       i++;
+  //     } else if (char === '"') {
+  //       insideQuotes = !insideQuotes;
+  //     } else {
+  //       currentCell += char;
+  //     }
+  //   }
+
+  //   cells.push(currentCell.trimEnd());
+
+  //   return cells;
+  // });
+}
+
+/**
  * The function checks if a given cell contains only numbers.
  * @param {str} cell The "cell" parameter is a variable that represents a single cell in a spreadsheet or
  * table. The function "cellIsOnlyNumber" takes this cell as input and checks if it contains only
@@ -79,40 +173,8 @@ function cellIsOnlyNumber(cell) {
  * @returns {characterObject} An object with two properties: "attributes" and "skills".
  */
 function parseCSV(csv) {
-  /**
-   * bulk of processing, convert the comma delimited csv into "lines"
-   * each line is a row so we can index by row-column format e.g. line[row][column]
-   */
-  const lines = csv.split("\n").map((line) => {
-    const cells = [];
-    let currentCell = "";
-    let insideQuotes = false;
-
-    for (let i = 0; i < line.length; i++) {
-      const char = line.charAt(i);
-
-      if (char === "," && !insideQuotes) {
-        cells.push(currentCell);
-        currentCell = "";
-      } else if (
-        char === '"' &&
-        i < line.length - 1 &&
-        line.charAt(i + 1) === '"'
-      ) {
-        // Handle escaped quotes
-        currentCell += '"';
-        i++;
-      } else if (char === '"') {
-        insideQuotes = !insideQuotes;
-      } else {
-        currentCell += char;
-      }
-    }
-
-    cells.push(currentCell.trimEnd());
-
-    return cells;
-  });
+  // convert the csv string to 2D array
+  const lines = csvStrToArray(csv);
 
   // create collections
   const attributes = new AttributeCollection();
