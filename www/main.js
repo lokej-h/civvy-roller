@@ -28,7 +28,7 @@ function handleFile() {
 /**
  * The function loads a CSV file, parses it, generates HTML from the parsed data, adds the HTML to the
  * DOM, and adds an event listener to the skills form.
- * @param csv - a string containing comma-separated values (CSV) representing skills data.
+ * @param {str} csv - a string containing comma-separated values (CSV) representing skills data.
  */
 function loadCSV(csv) {
   const properties = parseCSV(csv);
@@ -58,8 +58,8 @@ function loadCSV(csv) {
 }
 
 /**
- * bulk of processing, convert the comma delimited csv into "lines"
- * each line is a row so we can index by row-column format e.g. line[row][column]
+ * Bulk of processing, convert the comma delimited csv into "lines"
+ * Each line is a row so we can index by row-column format e.g. line[row][column]
  * @param {str} csv string csv directly from the uploaded file
  * @returns {Array<Array<str>>} 2D array version of the csv
  */
@@ -88,7 +88,6 @@ function csvStrToArray(csv) {
   for (let i = 0; i < csv.length; i++) {
     // get char
     const char = csv.charAt(i);
-    console.log(char);
     if (char === '"') {
       insideQuotes = !insideQuotes;
       continue;
@@ -119,36 +118,6 @@ function csvStrToArray(csv) {
     currentCell += char;
   }
   return lines;
-  // const lines = csv.split("\n").map((line) => {
-  //   const cells = [];
-  //   let currentCell = "";
-  //   let insideQuotes = false;
-
-  //   for (let i = 0; i < line.length; i++) {
-  //     const char = line.charAt(i);
-
-  //     if (char === "," && !insideQuotes) {
-  //       cells.push(currentCell);
-  //       currentCell = "";
-  //     } else if (
-  //       char === '"' &&
-  //       i < line.length - 1 &&
-  //       line.charAt(i + 1) === '"'
-  //     ) {
-  //       // Handle escaped quotes
-  //       currentCell += '"';
-  //       i++;
-  //     } else if (char === '"') {
-  //       insideQuotes = !insideQuotes;
-  //     } else {
-  //       currentCell += char;
-  //     }
-  //   }
-
-  //   cells.push(currentCell.trimEnd());
-
-  //   return cells;
-  // });
 }
 
 /**
