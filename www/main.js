@@ -87,7 +87,7 @@ function csvStrToArray(csv) {
   let insideQuotes = false;
   for (let i = 0; i < csv.length; i++) {
     // get char
-    let char = csv.charAt(i);
+    const char = csv.charAt(i);
     console.log(char);
     if (char === '"') {
       insideQuotes = !insideQuotes;
