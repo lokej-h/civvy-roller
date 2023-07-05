@@ -64,7 +64,7 @@ function loadCSV(csv) {
  * @returns {Array<Array<str>>} 2D array version of the csv
  */
 function csvStrToArray(csv) {
-  const totalColumns = csv.split("\n")[0].split(',').length;
+  const totalColumns = csv.split("\n")[0].split(",").length;
   // 2D array
   const lines = [];
   /**
@@ -91,11 +91,11 @@ function csvStrToArray(csv) {
     console.log(char);
     if (char === '"') {
       insideQuotes = !insideQuotes;
-      continue
+      continue;
     }
     if (!insideQuotes) {
       // check for cell delimiter
-      if (char === ',') {
+      if (char === ",") {
         // add cell to row, if Windows, there's going to be \r's at the start
         // of some rows
         cells.push(currentCell.trimEnd().trimStart());
@@ -107,7 +107,7 @@ function csvStrToArray(csv) {
        * If we hit the end of the row
        * This is always at the end of a line
        */
-      if (char === '\n') {
+      if (char === "\n") {
         // add row to 2D array
         lines.push(cells);
         // reset row state
@@ -119,7 +119,7 @@ function csvStrToArray(csv) {
     currentCell += char;
   }
   return lines;
-    // const lines = csv.split("\n").map((line) => {
+  // const lines = csv.split("\n").map((line) => {
   //   const cells = [];
   //   let currentCell = "";
   //   let insideQuotes = false;
