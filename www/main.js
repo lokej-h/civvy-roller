@@ -105,10 +105,7 @@ function csvStrToArray(csv) {
        */
       if (char === "\n") {
         pushCellData();
-        // add row to 2D array
-        lines.push(cells);
-        // reset row state
-        cells = [];
+        pushRowData();
         // console.log("Row complete: ", lines[-1]);
         continue;
       }
@@ -126,6 +123,12 @@ function csvStrToArray(csv) {
     cells.push(currentCell.trimEnd());
     // reset cell data
     currentCell = "";
+  }
+  function pushRowData() {
+    // add row to 2D array
+    lines.push(cells);
+    // reset row state
+    cells = [];
   }
 }
 
