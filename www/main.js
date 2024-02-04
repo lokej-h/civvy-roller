@@ -484,15 +484,19 @@ function showAndScrollToID(id) {
  * "calculateRoll" uses a loop to roll a dice "n" times and calculates the sum of the values obtained
  * in each roll. The function uses the window.crypto.getRandomValues method to generate a random number
  * between
- * @returns The function `calculateRoll` returns the sum of `n` random dice rolls, where each roll is a
- * random integer between 1 and 6 (inclusive).
+ * @returns The function `calculateRoll` returns an object containing the sum of `n` random 
+ * dice rolls, where each roll is a random integer between 1 and 6 (inclusive), along with an array
+ * of each number in the roll.
  */
 function calculateRoll(n) {
   let sum = 0;
+  let rolls = [];
   for (let i = 0; i < n; i++) {
-    sum += (window.crypto.getRandomValues(new Uint8Array(1))[0] % 6) + 1;
+    let roll = (window.crypto.getRandomValues(new Uint8Array(1))[0] % 6) + 1;
+    rolls.push(roll);
+    sum += roll;
   }
-  return sum;
+  return { sum, rolls };
 }
 
 /**
@@ -510,14 +514,15 @@ function rollAgainstSelectedHandler() {
     return;
   }
 
-  const totalRoll = calculateRoll(numRolls);
-  let rollComment = "";
+  const { sum, rolls } = calculateRoll(numRolls);
+  totalRoll = sum;
+  let rollComment = `Your rolls are ${rolls.toString()}`;
 
   if (totalRoll === numRolls) {
-    rollComment = `SNAKE EYES! Mark your attribute for level up  `;
+    rollComment += `SNAKE EYES! Mark your attribute for level up  `;
   }
   if (totalRoll === numRolls * 6) {
-    rollComment = `Crit Fail! Add a Tomino Token because you're gonna have a bad time...`;
+    rollComment += `Crit Fail! Add a Tomino Token because you're gonna have a bad time...`;
   }
 
   // do a little spinny for the UI
