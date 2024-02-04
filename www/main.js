@@ -193,7 +193,7 @@ function parseCSV(csv) {
     // Find abilities column
     // we know it is in the first row
     const attributeColumnOffset = lines[0].findIndex((cell) =>
-      cell.includes("Attributes")
+      cell.includes("Attributes"),
     );
     if (attributeColumnOffset === -1) {
       throw new Error("Unable to find attributes section");
@@ -226,7 +226,7 @@ function parseCSV(csv) {
   function getVehicleMetadata() {
     // Find start of vehicle section
     const vehicleRowHeader = lines.findIndex((row) =>
-      row[0].includes("Consumable Stats")
+      row[0].includes("Consumable Stats"),
     );
     if (vehicleRowHeader === -1) {
       throw new Error("Unable to find start of vehicle section");
@@ -234,7 +234,7 @@ function parseCSV(csv) {
     // using the first vehicle attribute, find which cell (column) only contains digits
     // we +1 the row to get into vehicle attributes
     const vehicleColumnsStart = lines[vehicleRowHeader + 1].findIndex((cell) =>
-      cellIsOnlyNumber(cell)
+      cellIsOnlyNumber(cell),
     );
 
     // Get vehicles by slicing the array
@@ -265,7 +265,7 @@ function parseCSV(csv) {
         value: lines[i + 1][attributeColumnOffset + 1],
       };
       attributes.add(
-        new Attribute(attribute.name, attribute.value, attribute.description)
+        new Attribute(attribute.name, attribute.value, attribute.description),
       );
       // if (attribute.name !== "") attributes.push(attribute);
     }
@@ -291,8 +291,8 @@ function parseCSV(csv) {
               skill.name,
               skill.value,
               skill.description,
-              skill.category
-            )
+              skill.category,
+            ),
           );
           // skills.push(skill);
           row++;
@@ -341,15 +341,15 @@ function parseCSV(csv) {
 
       const vehicleClass = new Vehicle(
         vehicle.name,
-        vehicle.specialDescription
+        vehicle.specialDescription,
       );
       for (const attribute of vehicle.attributes) {
         vehicleClass.add(
           new VehicleStat(
             attribute.name,
             attribute.value,
-            attribute.description
-          )
+            attribute.description,
+          ),
         );
       }
       vehicles.add(vehicleClass);
@@ -427,11 +427,11 @@ function extractSelected() {
   // Get selected attributes and skills
   const selected = [];
   const checkboxes = document.querySelectorAll(
-    'input[type="checkbox"]:checked'
+    'input[type="checkbox"]:checked',
   );
   for (const checkbox of checkboxes) {
     selected.push(
-      document.getElementById(checkbox.id + "_value").valueAsNumber
+      document.getElementById(checkbox.id + "_value").valueAsNumber,
     );
   }
 
@@ -484,7 +484,7 @@ function showAndScrollToID(id) {
  * "calculateRoll" uses a loop to roll a dice "n" times and calculates the sum of the values obtained
  * in each roll. The function uses the window.crypto.getRandomValues method to generate a random number
  * between
- * @returns The function `calculateRoll` returns an object containing the sum of `n` random 
+ * @returns The function `calculateRoll` returns an object containing the sum of `n` random
  * dice rolls, where each roll is a random integer between 1 and 6 (inclusive), along with an array
  * of each number in the roll.
  */
@@ -640,7 +640,7 @@ function showOddsHandler() {
   const rollProbability = probRollLower(
     totalSelectedAdvantage,
     numRolls,
-    distribution
+    distribution,
   );
 
   // early return
