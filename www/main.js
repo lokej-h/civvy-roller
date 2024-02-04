@@ -490,9 +490,9 @@ function showAndScrollToID(id) {
  */
 function calculateRoll(n) {
   let sum = 0;
-  let rolls = [];
+  const rolls = [];
   for (let i = 0; i < n; i++) {
-    let roll = (window.crypto.getRandomValues(new Uint8Array(1))[0] % 6) + 1;
+    const roll = (window.crypto.getRandomValues(new Uint8Array(1))[0] % 6) + 1;
     rolls.push(roll);
     sum += roll;
   }
